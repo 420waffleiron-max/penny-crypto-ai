@@ -686,3 +686,35 @@
     </script>
 </body>
 </html>
+async function checkNetwork() {
+    if (!provider) return;
+    
+    const network = await provider.getNetwork();
+    const chainId = network.chainId;
+    
+    // Ethereum Mainnet = 1
+    if (chainId !== 1) {
+        showToast('Wrong network! Switch to Ethereum Mainnet', true);
+        document.getElementById('networkName').innerHTML = 
+            `<span style="color: #ff3366;">⚠️ Chain ${chainId} - Click to switch</span>`;
+        
+        // Add click handler to switch
+        document.getElementById('networkName').onclick = switchToEthereum;
+        document.getElementById('networkName').style.cursor = 'pointer';
+        return false;
+    }
+    return true;
+}
+
+async function switchToEthereum() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x1' }], // 0x1 = Ethereum Mainnet
+        });
+        showToast('Switched to Ethereum!');
+        setTimeout(() => location.reload(), 1000);
+    } catch (e) {
+        showToast('Failed to switch', true);
+    }
+}
