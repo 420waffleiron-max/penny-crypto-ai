@@ -3,718 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0a">
-    <title>Ultimate AI - Smart Trading</title>
+    <meta name="theme-color" content="#0c0c1d">
+    <title>Penny Crypto AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
             color: #fff;
             min-height: 100vh;
             margin: 0;
-            padding-bottom: 100px;
+            padding-bottom: 80px;
         }
-        .gradient-text {
-            background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .glass-panel {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 16px;
+        .glass {
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(10px);
-        }
-        .neon-border {
-            border: 1px solid rgba(0,255,136,0.3);
-            box-shadow: 0 0 20px rgba(0,255,136,0.1);
-        }
-        .btn-green {
-            background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
-            color: #000;
-            font-weight: bold;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 8px 0;
-        }
-        .btn-red {
-            background: linear-gradient(135deg, #ff1744 0%, #f50057 100%);
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 8px 0;
-        }
-        .btn-orange {
-            background: linear-gradient(135deg, #ff9100 0%, #ff6d00 100%);
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 8px 0;
-        }
-        .status-badge {
-            background: rgba(0,255,136,0.15);
-            color: #00ff88;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid rgba(0,255,136,0.3);
-        }
-        .input-field {
-            background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 14px;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
             color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
             width: 100%;
-            font-size: 16px;
             margin-top: 8px;
         }
+        .btn-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn-red { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+        .btn-orange { background: linear-gradient(135deg, #e2761b 0%, #c45c00 100%); }
+        .signal-buy { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.1); }
+        .signal-sell { border-left: 4px solid #ff3366; background: rgba(255,51,102,0.1); }
+        .signal-hold { border-left: 4px solid #ffc107; background: rgba(255,193,7,0.1); }
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(10,10,10,0.95);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(12,12,29,0.95);
+            padding: 12px;
             display: flex;
             justify-content: space-around;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn { background: none; border: none; color: #888; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-btn.active { color: #00ff88; }
+        .hidden { display: none !important; }
+        input, select {
+            width: 100%;
             padding: 12px;
-            backdrop-filter: blur(20px);
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #666;
-            font-size: 11px;
-            gap: 4px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 12px;
-        }
-        .nav-item.active {
-            color: #00ff88;
-            background: rgba(0,255,136,0.1);
-        }
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-            margin-right: 6px;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            margin-top: 8px;
+            font-size: 16px;
         }
         .coin-card {
-            background: rgba(255,255,255,0.03);
-            border-left: 3px solid #00ff88;
-            border-radius: 12px;
             padding: 16px;
-            margin: 12px 16px;
+            margin-bottom: 12px;
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        .coin-card:active { transform: scale(0.98); }
-        .progress-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00ccff);
-            transition: width 0.3s;
         }
         #toast {
             position: fixed;
-            top: 60px;
+            top: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            border: 1px solid rgba(0,255,136,0.3);
-            color: #00ff88;
+            background: #333;
             padding: 12px 24px;
             border-radius: 24px;
-            font-size: 14px;
             opacity: 0;
             transition: 0.3s;
-            z-index: 1000;
             pointer-events: none;
+            z-index: 1000;
         }
-        .hidden { display: none !important; }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-top-color: #00ff88;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .network-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 14px;
+            cursor: pointer;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
-    <div style="padding: 20px 16px 0; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 800;">
-                <span class="gradient-text">ULTIMATE AI</span>
-            </h1>
-            <p style="margin: 4px 0 0 0; color: #888; font-size: 13px;">Smart Exit System | Gas Guardian</p>
-        </div>
-        <button id="connectBtn" onclick="connectWallet()" class="status-badge" style="cursor: pointer;">
-            🦊 Connect
-        </button>
-    </div>
-
-    <!-- Wallet Card -->
-    <div id="walletCard" class="glass-panel neon-border" style="margin-top: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                    Connected Wallet
-                </p>
-                <p id="walletAddr" style="margin: 8px 0; font-family: monospace; font-size: 20px; color: #00ff88; font-weight: bold;">
-                    Not Connected
-                </p>
-                <p id="networkName" style="margin: 0; font-size: 11px; color: #3388ff;"></p>
-            </div>
-            <div style="text-align: right;">
-                <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 4px;">
-                    <span id="liveDot" class="pulse-dot hidden"></span>
-                    <span id="balanceDisplay" style="font-size: 32px; font-weight: bold; color: #00ff88; font-family: monospace;">
-                        0.0000
-                    </span>
-                    <span style="font-size: 18px; color: #00ff88; margin-left: 4px;">ETH</span>
-                </div>
-                <p id="usdValue" style="margin: 0; color: #888; font-size: 14px;">$0.00</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gas Guardian -->
-    <div class="glass-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 20px;">⛽</span>
-                <span style="font-weight: 600;">Gas Guardian</span>
-            </div>
-            <span id="gasPrice" style="color: #888; font-size: 14px;">-- Gwei</span>
-        </div>
-        <div style="background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2); border-radius: 12px; padding: 16px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span style="color: #00ff88; font-size: 20px;">✅</span>
-                <span id="gasStatus" style="color: #00ff88; font-weight: bold; font-size: 16px;">Waiting...</span>
-            </div>
-            <p id="gasDetail" style="margin: 0; color: #888; font-size: 13px;">Connect wallet to check gas</p>
-        </div>
-    </div>
-
-    <!-- Portfolio Settings -->
-    <div class="glass-panel">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-            <span style="font-size: 20px;">💰</span>
-            <span style="font-weight: 600; color: #3388ff;">Portfolio Settings</span>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div>
-                <p style="margin: 0 0 4px 0; color: #888; font-size: 11px; text-transform: uppercase;">Total Balance</p>
-                <input type="number" id="totalBalance" class="input-field" value="10" onchange="updatePosition()">
-            </div>
-            <div>
-                <p style="margin: 0 0 4px 0; color: #888; font-size: 11px; text-transform: uppercase;">Per Trade</p>
-                <input type="number" id="perTrade" class="input-field" value="2" onchange="updatePosition()">
-            </div>
+    <div style="padding: 16px; max-width: 500px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 24px;">🚀 Penny Crypto AI</h1>
+            <button id="connectBtn" onclick="connectWallet()" class="btn btn-orange" style="width: auto; margin: 0; padding: 8px 16px; font-size: 14px;">
+                🦊 Connect
+            </button>
         </div>
 
-        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="color: #888; font-size: 14px;">Position Size</span>
-                <span id="positionSize" style="color: #00ff88; font-weight: bold;">20%</span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color: #888; font-size: 14px;">Risk Level</span>
-                <span style="color: #ffaa00; font-weight: bold;">Medium</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Road to $100 -->
-    <div class="glass-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 20px;">🎯</span>
-                <span style="color: #ffaa00; font-weight: 600;">Road to $100</span>
-            </div>
-            <span id="currentProfit" style="color: #00ff88; font-weight: bold; font-size: 18px;">$10.00</span>
-        </div>
-        <div class="progress-bar">
-            <div id="profitProgress" class="progress-fill" style="width: 10%;"></div>
-        </div>
-    </div>
-
-    <!-- AI Signals -->
-    <div id="signalsSection">
-        <div style="padding: 0 16px; margin-top: 24px; margin-bottom: 12px;">
-            <h3 style="margin: 0; color: #888; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
-                🚀 AI Signals
-            </h3>
-        </div>
-        <div id="coinsList"></div>
-    </div>
-
-    <!-- Trade Modal -->
-    <div id="tradeModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 200; display: none; overflow-y: auto;">
-        <div style="min-height: 100vh; padding: 20px;">
-            <div style="max-width: 500px; margin: 0 auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="margin: 0; font-size: 24px;">Execute Trade</h2>
-                    <button onclick="closeModal()" style="background: none; border: none; color: #888; font-size: 28px; cursor: pointer;">&times;</button>
-                </div>
-
-                <!-- Hold Time Card -->
-                <div class="glass-panel neon-border" style="text-align: center;">
-                    <p style="margin: 0 0 8px 0; color: #00ff88; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
-                        ⏱️ Recommended Hold Time
-                    </p>
-                    <h1 style="margin: 0; font-size: 48px; color: #00ff88; font-weight: bold;">2 DAYS</h1>
-                    <p style="margin: 8px 0 0 0; color: #888; font-size: 14px;">Ride the wave - fast profits</p>
-                    
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <p style="margin: 0; color: #888; font-size: 14px;">Position: 
-                            <span style="color: white; font-weight: bold;">$<span id="tradeAmount">2</span></span> 
-                            of 
-                            <span style="color: white; font-weight: bold;">$<span id="totalBalDisplay">10</span></span>
-                        </p>
+        <div id="walletInfo" class="glass hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <p style="margin: 0; color: #888; font-size: 12px;">Wallet</p>
+                    <p id="walletAddr" style="margin: 4px 0; font-family: monospace; font-size: 18px; color: #00ff88;"></p>
+                    <p id="networkName" style="margin: 0; font-size: 14px; color: #3388ff; font-weight: bold;"></p>
+                    <div id="networkWarning" class="network-warning hidden" onclick="switchToEthereum()">
+                        ⚠️ Click here to switch to Ethereum Mainnet
                     </div>
                 </div>
-
-                <!-- Strategy Card -->
-                <div class="glass-panel" style="background: rgba(0,255,136,0.05); text-align: center;">
-                    <p style="margin: 0; font-size: 18px; color: white;">
-                        🚀 Buying $<span id="strategyAmount">2</span> <span id="strategyCoin">PEPE</span>! Hold 2 DAYS
-                    </p>
-                </div>
-
-                <!-- Risk Warning -->
-                <div class="glass-panel" style="background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3);">
-                    <p style="margin: 0; color: #00ff88; font-size: 14px; text-align: center;">
-                        ✅ GOOD RISK: 20% position size is perfect for learning.
-                    </p>
-                </div>
-
-                <!-- Action Buttons -->
-                <button onclick="executeStrategy('buy')" id="executeBtn" class="btn-green">
-                    EXECUTE BUY STRATEGY
-                </button>
-                
-                <button onclick="executeStrategy('sell')" class="btn-red">
-                    SELL NOW
-                </button>
-                
-                <button onclick="openMetaMask()" class="btn-orange">
-                    🦊 OPEN METAMASK
-                </button>
-
-                <div id="txStatus" style="text-align: center; margin-top: 20px; display: none;">
-                    <div class="loading"></div>
-                    <p style="color: #888; margin-top: 8px; font-size: 14px;">Confirm in MetaMask...</p>
-                </div>
             </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="margin: 0; color: #888; font-size: 12px;">Balance</p>
+                <p id="walletBal" style="margin: 4px 0; font-size: 28px; font-weight: bold; color: white;"></p>
+                <p id="walletBalUsd" style="margin: 0; font-size: 14px; color: #888;"></p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+            <div class="glass" style="text-align: center; padding: 12px;">
+                <p style="margin: 0; font-size: 12px; color: #888;">Buys</p>
+                <p id="buyCount" style="margin: 4px 0; font-size: 24px; font-weight: bold; color: #00ff88;">0</p>
+            </div>
+            <div class="glass" style="text-align: center; padding: 12px;">
+                <p style="margin: 0; font-size: 12px; color: #888;">Mood</p>
+                <p id="mood" style="margin: 4px 0; font-size: 20px;">😴</p>
+            </div>
+            <div class="glass" style="text-align: center; padding: 12px;">
+                <p style="margin: 0; font-size: 12px; color: #888;">Top</p>
+                <p id="topCoin" style="margin: 4px 0; font-size: 16px; font-weight: bold; color: #3388ff;">--</p>
+            </div>
+        </div>
+
+        <div id="loading" style="text-align: center; padding: 40px;">
+            <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #00ff88; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+            <p style="color: #888; margin-top: 16px;">AI analyzing markets...</p>
+        </div>
+
+        <div id="coinsList" class="hidden"></div>
+    </div>
+
+    <div id="tradeModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;">
+        <div class="glass" style="width: 100%; max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0;">Trade</h2>
+                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 24px;">&times;</button>
+            </div>
+            <div style="margin-bottom: 16px;">
+                <p style="margin: 0; color: #888; font-size: 12px;">Token</p>
+                <p id="modalCoin" style="margin: 4px 0; font-size: 20px; font-weight: bold;">--</p>
+                <p id="modalPrice" style="margin: 0; font-family: monospace; color: #3388ff;"></p>
+                <p id="modalSignal" style="margin: 4px 0; font-size: 14px;"></p>
+            </div>
+            <div style="margin-bottom: 16px;">
+                <p style="margin: 0; color: #888; font-size: 12px;">Amount USD</p>
+                <input type="number" id="amount" placeholder="100" oninput="calcTokens()">
+                <p id="tokenEst" style="margin: 8px 0 0 0; font-size: 12px; color: #888; text-align: right;"></p>
+            </div>
+            <button onclick="prepareTrade('buy')" class="btn btn-green">BUY</button>
+            <button onclick="prepareTrade('sell')" class="btn btn-red" style="margin-top: 8px;">SELL</button>
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="showTab('signals')">
-            <span style="font-size: 24px;">📊</span>
-            <span>Signals</span>
-        </div>
-        <div class="nav-item" onclick="refreshData()">
-            <span style="font-size: 24px;">🔄</span>
-            <span>Refresh</span>
-        </div>
-        <div class="nav-item" onclick="showTab('wallet')">
-            <span style="font-size: 24px;">👛</span>
-            <span>Wallet</span>
-        </div>
+        <button class="nav-btn active" onclick="showHome()">📊<span>Signals</span></button>
+        <button class="nav-btn" onclick="refresh()">🔄<span>Refresh</span></button>
+        <button class="nav-btn" onclick="showWallet()">👛<span>Wallet</span></button>
     </div>
 
     <div id="toast"></div>
 
     <script>
-        let provider, signer, address, userBalance = 0, selectedCoin = null;
-        let currentEthPrice = 2650; // Will fetch real price
-        let updateInterval;
+        let provider, signer, address, chainId, coins = [], selected = null;
+        const ETH_PRICE = 2100; // Approximate ETH price in USD
 
         function showToast(msg, isError = false) {
             const t = document.getElementById('toast');
             t.textContent = msg;
-            t.style.borderColor = isError ? 'rgba(255,51,102,0.5)' : 'rgba(0,255,136,0.3)';
-            t.style.color = isError ? '#ff3366' : '#00ff88';
             t.style.opacity = '1';
+            t.style.background = isError ? 'rgba(255,51,102,0.9)' : 'rgba(0,255,136,0.9)';
+            t.style.color = isError ? '#fff' : '#000';
             setTimeout(() => t.style.opacity = '0', 3000);
         }
 
         async function connectWallet() {
             try {
                 if (!window.ethereum) {
-                    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                        window.location.href = 'https://metamask.app.link/dapp/' + window.location.host;
-                    } else {
-                        showToast('Install MetaMask', true);
-                    }
+                    showToast('MetaMask not found', true);
                     return;
                 }
-
-                // Force fresh connection
-                provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-                
-                // Request accounts
-                await provider.send("eth_requestAccounts", []);
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 address = await signer.getAddress();
                 
+                // Check network immediately
+                await checkNetwork();
+                
                 // Setup listeners
-                window.ethereum.on('accountsChanged', handleAccountChange);
-                window.ethereum.on('chainChanged', () => window.location.reload());
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) disconnectWallet();
+                    else {
+                        address = accounts[0];
+                        updateWallet();
+                    }
+                });
                 
-                // Start updates
-                startLiveUpdates();
-                await updateWalletUI();
+                window.ethereum.on('chainChanged', () => {
+                    window.location.reload();
+                });
                 
-                document.getElementById('connectBtn').innerHTML = '✅ Connected';
-                showToast('Wallet connected!');
-                
-            } catch (e) {
-                console.error(e);
+                updateWallet();
+                showToast('Connected!');
+            } catch(e) {
                 showToast('Connection failed', true);
             }
         }
 
-        function handleAccountChange(accounts) {
-            if (accounts.length === 0) {
-                showToast('Wallet disconnected', true);
-                location.reload();
-            } else {
-                address = accounts[0];
-                updateWalletUI();
-            }
-        }
-
-        function startLiveUpdates() {
-            updateBalance(); // Immediate
-            updateGas(); // Immediate
-            updateInterval = setInterval(() => {
-                updateBalance();
-                updateGas();
-            }, 5000); // Every 5 seconds
-        }
-
-        async function updateWalletUI() {
-            if (!address) return;
-            
-            const shortAddr = address.slice(0,6) + '...' + address.slice(-4);
-            document.getElementById('walletAddr').textContent = shortAddr;
-            
-            // Get network
+        async function checkNetwork() {
+            if (!provider) return;
             const network = await provider.getNetwork();
+            chainId = network.chainId;
+            
             const networkNames = {
                 1: 'Ethereum Mainnet',
                 8453: 'Base',
                 137: 'Polygon',
                 42161: 'Arbitrum',
-                56: 'BSC'
+                56: 'BSC',
+                59144: 'Linea',
+                11155111: 'Sepolia'
             };
-            document.getElementById('networkName').textContent = networkNames[network.chainId] || `Chain ${network.chainId}`;
             
-            document.getElementById('liveDot').classList.remove('hidden');
+            const currentNetwork = networkNames[chainId] || `Chain ${chainId}`;
+            document.getElementById('networkName').textContent = currentNetwork;
+            
+            // Show warning if not on Ethereum Mainnet
+            if (chainId !== 1) {
+                document.getElementById('networkWarning').classList.remove('hidden');
+                document.getElementById('networkName').style.color = '#ffc107';
+                return false;
+            } else {
+                document.getElementById('networkWarning').classList.add('hidden');
+                document.getElementById('networkName').style.color = '#00ff88';
+                return true;
+            }
+        }
+
+        async function switchToEthereum() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1' }], // 0x1 = Ethereum Mainnet
+                });
+                showToast('Switched to Ethereum!');
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (e) {
+                if (e.code === 4902) {
+                    // Chain not added, add it
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x1',
+                                chainName: 'Ethereum Mainnet',
+                                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                rpcUrls: ['https://ethereum.publicnode.com'],
+                                blockExplorerUrls: ['https://etherscan.io']
+                            }]
+                        });
+                    } catch (addError) {
+                        showToast('Failed to add Ethereum', true);
+                    }
+                } else {
+                    showToast('Failed to switch', true);
+                }
+            }
+        }
+
+        function disconnectWallet() {
+            address = null;
+            document.getElementById('connectBtn').textContent = '🦊 Connect';
+            document.getElementById('walletInfo').classList.add('hidden');
+        }
+
+        async function updateWallet() {
+            if (!address) return;
+            
+            document.getElementById('connectBtn').textContent = '✅ Connected';
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('walletAddr').textContent = address.slice(0,6) + '...' + address.slice(-4);
+            
+            await updateBalance();
         }
 
         async function updateBalance() {
             if (!provider || !address) return;
             
             try {
-                // This is the critical fix - use provider.getBalance with the address
-                const balance = await provider.getBalance(address);
-                const ethBalance = parseFloat(ethers.utils.formatEther(balance));
-                userBalance = ethBalance;
+                const bal = await provider.getBalance(address);
+                const eth = parseFloat(ethers.utils.formatEther(bal));
+                const usd = eth * ETH_PRICE;
                 
-                const usdValue = ethBalance * currentEthPrice;
+                document.getElementById('walletBal').textContent = eth.toFixed(4) + ' ETH';
+                document.getElementById('walletBalUsd').textContent = '~$' + usd.toFixed(2);
                 
-                // Animate the number change
-                document.getElementById('balanceDisplay').textContent = ethBalance.toFixed(4);
-                document.getElementById('usdValue').textContent = '$' + usdValue.toFixed(2);
-                
-                // If balance is 0 but MetaMask shows funds, we might be on wrong network
-                if (ethBalance === 0) {
-                    document.getElementById('usdValue').textContent = 'Wrong network?';
-                    document.getElementById('usdValue').style.color = '#ffaa00';
-                } else {
-                    document.getElementById('usdValue').style.color = '#888';
+                // If on wrong network, show warning in balance too
+                if (chainId !== 1) {
+                    document.getElementById('walletBal').textContent = '0.0000 ETH';
+                    document.getElementById('walletBalUsd').textContent = 'Switch to Ethereum to see balance';
                 }
-                
-            } catch (e) {
+            } catch(e) {
                 console.error('Balance error:', e);
             }
         }
 
-        async function updateGas() {
-            if (!provider) return;
-            try {
-                const gasPrice = await provider.getGasPrice();
-                const gwei = Math.round(ethers.utils.formatUnits(gasPrice, 'gwei'));
+        function init() {
+            const data = [
+                {s:'PEPE',n:'Pepe',p:0.00000123,c24:45.2,c7:156.8,v:520000000,mc:520000000},
+                {s:'SHIB',n:'Shiba Inu',p:0.00000845,c24:12.5,c7:28.4,v:480000000,mc:5000000000},
+                {s:'BONK',n:'Bonk',p:0.00000234,c24:-8.3,c7:67.2,v:98000000,mc:145000000},
+                {s:'FLOKI',n:'Floki',p:0.0000365,c24:18.7,c7:42.1,v:75000000,mc:350000000},
+                {s:'WOJAK',n:'Wojak',p:0.0000089,c24:62.3,c7:234.5,v:28000000,mc:35000000}
+            ];
+            
+            coins = data.map(c => {
+                let score = 50, risk = 50;
+                const ratio = c.v/c.mc;
+                if(ratio>0.3){score+=15;risk-=10;}
+                else if(ratio<0.05){score-=10;risk+=20;}
+                if(c.c24>30)score+=10;
+                if(c.c24<-20){score-=10;risk+=10;}
+                if(c.c7>100)score+=10;
+                if(c.mc<50000000)risk+=15;
                 
-                document.getElementById('gasPrice').textContent = gwei + ' Gwei';
+                let sig='HOLD',conf=50;
+                if(score>=80&&risk<40){sig='STRONG BUY';conf=90;}
+                else if(score>=65&&risk<55){sig='BUY';conf=75;}
+                else if(score<35||risk>80){sig='SELL';conf=80;}
+                else if(score<50){sig='WEAK SELL';conf=60;}
                 
-                let status, detail, color;
-                if (gwei < 20) {
-                    status = gwei + ' Gwei - LOW - PERFECT';
-                    detail = '~$1.10/tx | Night mode = cheap gas!';
-                    color = '#00ff88';
-                } else if (gwei < 40) {
-                    status = gwei + ' Gwei - MEDIUM';
-                    detail = '~$2.50/tx | Acceptable';
-                    color = '#ffaa00';
-                } else {
-                    status = gwei + ' Gwei - HIGH';
-                    detail = '~$5.00+/tx | Wait for lower';
-                    color = '#ff3366';
-                }
-                
-                document.getElementById('gasStatus').textContent = status;
-                document.getElementById('gasStatus').style.color = color;
-                document.getElementById('gasDetail').textContent = detail;
-                
-            } catch (e) {
-                console.error('Gas error:', e);
-            }
+                return {...c,score:Math.min(100,score),risk,sig,conf};
+            }).sort((a,b)=>b.score-a.score);
+            
+            render();
+            updateStats();
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('coinsList').classList.remove('hidden');
         }
 
-        function updatePosition() {
-            const total = parseFloat(document.getElementById('totalBalance').value) || 10;
-            const perTrade = parseFloat(document.getElementById('perTrade').value) || 2;
-            const pct = Math.round((perTrade / total) * 100);
-            document.getElementById('positionSize').textContent = pct + '%';
-            document.getElementById('totalBalDisplay').textContent = total;
-        }
-
-        // Coin data with contract addresses for real trading
-        const coins = [
-            {symbol: 'PEPE', name: 'Pepe', price: 0.00000123, change: 45.2, contract: '0x6982508145454Ce325dDbE47a25d4ec3d2311933'},
-            {symbol: 'SHIB', name: 'Shiba Inu', price: 0.00000845, change: 12.5, contract: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE'},
-            {symbol: 'BONK', name: 'Bonk', price: 0.00000234, change: -8.3, contract: null},
-            {symbol: 'FLOKI', name: 'Floki', price: 0.0000365, change: 18.7, contract: null},
-            {symbol: 'WOJAK', name: 'Wojak', price: 0.0000089, change: 62.3, contract: null}
-        ];
-
-        function renderCoins() {
+        function render() {
             const list = document.getElementById('coinsList');
             list.innerHTML = '';
-            
             coins.forEach(coin => {
-                const isPositive = coin.change >= 0;
-                const color = isPositive ? '#00ff88' : '#ff3366';
+                const cls = coin.sig.includes('BUY')?'signal-buy':coin.sig.includes('SELL')?'signal-sell':'signal-hold';
+                const col = coin.c24>=0?'#00ff88':'#ff3366';
+                const sign = coin.c24>=0?'+':'';
                 
-                const div = document.createElement('div');
-                div.className = 'coin-card';
-                div.onclick = () => openTrade(coin);
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 20px; font-weight: bold;">${coin.symbol}</div>
-                            <div style="font-size: 12px; color: #888;">${coin.name}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: ${color}; font-weight: bold; font-size: 18px;">
-                                ${isPositive ? '+' : ''}${coin.change}%
+                list.innerHTML += `
+                    <div class="coin-card ${cls}" onclick="openTrade('${coin.s}')">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <div>
+                                <span style="font-size:20px;font-weight:bold;">${coin.s}</span>
+                                <span style="color:#888;font-size:12px;"> ${coin.n}</span>
                             </div>
-                            <div style="font-size: 12px; color: #888;">24h</div>
+                            <div style="text-align:right;">
+                                <div style="font-size:12px;padding:4px 12px;border-radius:12px;background:rgba(0,0,0,0.3);display:inline-block;">${coin.sig}</div>
+                                <div style="font-size:11px;color:#888;margin-top:4px;">${coin.conf}% conf</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-size:24px;font-weight:bold;font-family:monospace;">$${coin.p.toExponential(2)}</div>
+                                <div style="font-size:12px;color:#888;">MCap: $${(coin.mc/1000000).toFixed(1)}M</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:${col};font-weight:bold;">${sign}${coin.c24.toFixed(1)}%</div>
+                                <div style="font-size:12px;color:#888;">24h</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px;background:rgba(255,255,255,0.1);border-radius:4px;height:4px;">
+                            <div style="width:${coin.score}%;height:100%;border-radius:4px;background:${coin.score>70?'#00ff88':coin.score>40?'#ffc107':'#ff3366'};"></div>
                         </div>
                     </div>
                 `;
-                list.appendChild(div);
             });
         }
 
-        function openTrade(coin) {
-            selectedCoin = coin;
-            const perTrade = document.getElementById('perTrade').value;
-            
-            document.getElementById('strategyCoin').textContent = coin.symbol;
-            document.getElementById('strategyAmount').textContent = perTrade;
-            document.getElementById('tradeAmount').textContent = perTrade;
-            
-            document.getElementById('tradeModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
+        function updateStats() {
+            const buys = coins.filter(c=>c.sig.includes('BUY')).length;
+            const top = coins.reduce((a,b)=>a.c7>b.c7?a:b);
+            document.getElementById('buyCount').textContent = buys;
+            document.getElementById('topCoin').textContent = top.s;
+            document.getElementById('mood').textContent = buys>=4?'🚀':buys>=2?'⚠️':'🐻';
+        }
+
+        function openTrade(sym) {
+            selected = coins.find(c=>c.s===sym);
+            document.getElementById('modalCoin').textContent = selected.s + ' - ' + selected.n;
+            document.getElementById('modalPrice').textContent = '$' + selected.p.toExponential(4);
+            document.getElementById('modalSignal').textContent = selected.sig + ' (' + selected.conf + '% confidence)';
+            document.getElementById('modalSignal').style.color = selected.sig.includes('BUY')?'#00ff88':selected.sig.includes('SELL')?'#ff3366':'#ffc107';
+            document.getElementById('amount').value = '';
+            document.getElementById('tokenEst').textContent = '';
+            document.getElementById('tradeModal').style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('tradeModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            document.getElementById('txStatus').style.display = 'none';
-            document.getElementById('executeBtn').disabled = false;
         }
 
-        async function executeStrategy(type) {
-            if (!address) {
-                showToast('Connect wallet first', true);
-                return;
-            }
-            
-            if (!selectedCoin || !selectedCoin.contract) {
-                showToast('Token not tradable yet', true);
-                return;
-            }
-
-            const amount = document.getElementById('perTrade').value;
-            const ethAmount = (amount / currentEthPrice).toFixed(6);
-            
-            if (parseFloat(ethAmount) > userBalance) {
-                showToast('Insufficient ETH balance', true);
-                return;
-            }
-
-            document.getElementById('executeBtn').disabled = true;
-            document.getElementById('txStatus').style.display = 'block';
-
-            try {
-                // For real Uniswap trading, you'd use the Router contract
-                // This sends ETH as a demonstration - REPLACE with DEX contract call
-                const tx = {
-                    to: selectedCoin.contract, // In real app, this is Uniswap Router
-                    value: ethers.utils.parseEther(ethAmount.toString()),
-                    // In production, use Uniswap V2 Router: swapExactETHForTokens
-                    data: "0x" // Encode the swap function here
-                };
-
-                showToast('Check MetaMask...');
-                const transaction = await signer.sendTransaction(tx);
-                
-                showToast('Transaction sent! Waiting...');
-                await transaction.wait();
-                
-                showToast('✅ Trade executed!');
-                
-                // Update balance immediately after trade
-                await updateBalance();
-                
-                // Update progress
-                const current = parseFloat(document.getElementById('currentProfit').textContent.replace('$',''));
-                const newVal = current + (amount * 0.1); // Simulate profit
-                document.getElementById('currentProfit').textContent = '$' + newVal.toFixed(2);
-                document.getElementById('profitProgress').style.width = newVal + '%';
-                
-                setTimeout(closeModal, 2000);
-                
-            } catch (e) {
-                console.error(e);
-                showToast('Transaction failed: ' + e.message, true);
-                document.getElementById('txStatus').style.display = 'none';
-                document.getElementById('executeBtn').disabled = false;
-            }
+        function calcTokens() {
+            const usd = parseFloat(document.getElementById('amount').value)||0;
+            const tokens = usd/selected.p;
+            document.getElementById('tokenEst').textContent = 'Est: ' + tokens.toExponential(2) + ' ' + selected.s;
         }
 
-        function openMetaMask() {
-            window.location.href = 'https://metamask.app.link/';
+        function prepareTrade(type) {
+            if(!address){showToast('Connect wallet first', true);return;}
+            if(chainId !== 1){showToast('Switch to Ethereum Mainnet first!', true);return;}
+            const amt = document.getElementById('amount').value;
+            if(!amt||amt<=0){showToast('Enter amount', true);return;}
+            showToast(type.toUpperCase() + ' ' + selected.s + ' - Check MetaMask');
         }
 
-        function showTab(tab) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-            
-            if (tab === 'wallet') {
-                document.getElementById('walletCard').scrollIntoView({behavior: 'smooth'});
-            } else if (tab === 'signals') {
-                document.getElementById('signalsSection').scrollIntoView({behavior: 'smooth'});
-            }
+        function showHome() {
+            document.getElementById('coinsList').scrollIntoView({behavior:'smooth'});
         }
 
-        function refreshData() {
-            const btn = event.target.closest('.nav-item');
-            btn.style.transform = 'rotate(360deg)';
-            btn.style.transition = 'transform 0.5s';
-            setTimeout(() => btn.style.transform = 'none', 500);
-            
-            if (address) {
-                updateBalance();
-                updateGas();
-            }
-            renderCoins();
-            showToast('Data refreshed');
+        function showWallet() {
+            if(!address) connectWallet();
+            else document.getElementById('walletInfo').scrollIntoView({behavior:'smooth'});
         }
 
-        // Initialize
-        renderCoins();
-        updatePosition();
-        
-        // Auto-connect if previously connected
-        if (window.ethereum && window.ethereum.selectedAddress) {
-            connectWallet();
+        function refresh() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('coinsList').classList.add('hidden');
+            setTimeout(()=>{
+                init();
+                if(address) updateBalance();
+                showToast('Refreshed!');
+            },1000);
         }
+
+        window.onclick = function(e) {
+            const m = document.getElementById('tradeModal');
+            if(e.target===m) m.style.display='none';
+        }
+
+        setTimeout(init, 1500);
     </script>
 </body>
 </html>
-async function checkNetwork() {
-    if (!provider) return;
-    
-    const network = await provider.getNetwork();
-    const chainId = network.chainId;
-    
-    // Ethereum Mainnet = 1
-    if (chainId !== 1) {
-        showToast('Wrong network! Switch to Ethereum Mainnet', true);
-        document.getElementById('networkName').innerHTML = 
-            `<span style="color: #ff3366;">⚠️ Chain ${chainId} - Click to switch</span>`;
-        
-        // Add click handler to switch
-        document.getElementById('networkName').onclick = switchToEthereum;
-        document.getElementById('networkName').style.cursor = 'pointer';
-        return false;
-    }
-    return true;
-}
-
-async function switchToEthereum() {
-    try {
-        await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x1' }], // 0x1 = Ethereum Mainnet
-        });
-        showToast('Switched to Ethereum!');
-        setTimeout(() => location.reload(), 1000);
-    } catch (e) {
-        showToast('Failed to switch', true);
-    }
-}
