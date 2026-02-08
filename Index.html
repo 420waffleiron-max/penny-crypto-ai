@@ -2,319 +2,1104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0c0c1d">
-    <title>Penny Crypto AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050508">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ULTIMATE AI TRADER | Smart Exit System</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #050508;
+            background: linear-gradient(135deg, #020205 0%, #0c0c1d 50%, #151528 100%);
             color: #fff;
             min-height: 100vh;
             margin: 0;
-            padding-bottom: 80px;
+            padding: 0 16px 100px 16px;
+            overflow-x: hidden;
         }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
         .glass {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.025);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
+        
+        .signal-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .signal-card:active {
+            transform: scale(0.98);
+        }
+        
+        .signal-strong-buy { 
+            border-left-color: #00ff88;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 255, 136, 0.02));
+        }
+        
+        .signal-buy { 
+            border-left-color: #00c864;
+            background: linear-gradient(135deg, rgba(0, 200, 100, 0.06), rgba(0, 200, 100, 0.02));
+        }
+        
+        .signal-sell { 
+            border-left-color: #ff3366;
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.08), rgba(255, 51, 102, 0.02));
+        }
+        
+        .signal-hold { 
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.06), rgba(255, 193, 7, 0.02));
+        }
+        
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
             border: none;
             color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: bold;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
             cursor: pointer;
             width: 100%;
-            margin-top: 8px;
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
         }
-        .btn-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .btn-red { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
-        .btn-orange { background: linear-gradient(135deg, #e2761b 0%, #c45c00 100%); }
-        .signal-buy { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.1); }
-        .signal-sell { border-left: 4px solid #ff3366; background: rgba(255,51,102,0.1); }
-        .signal-hold { border-left: 4px solid #ffc107; background: rgba(255,193,7,0.1); }
+        
+        .btn:active {
+            transform: scale(0.96);
+        }
+        
+        .btn-green { 
+            background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+            box-shadow: 0 4px 20px rgba(0, 200, 83, 0.3);
+        }
+        
+        .btn-red { 
+            background: linear-gradient(135deg, #ff1744 0%, #f50057 100%);
+            box-shadow: 0 4px 20px rgba(255, 23, 68, 0.3);
+        }
+        
+        .btn-orange { 
+            background: linear-gradient(135deg, #ff9100 0%, #ff6d00 100%);
+            box-shadow: 0 4px 20px rgba(255, 145, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .tier-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin: 10px 0;
+            border-radius: 14px;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .tier-1 { 
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.02));
+            border-color: rgba(0,255,136,0.3);
+        }
+        
+        .tier-2 { 
+            background: linear-gradient(135deg, rgba(51,136,255,0.1), rgba(51,136,255,0.02));
+            border-color: rgba(51,136,255,0.3);
+        }
+        
+        .tier-3 { 
+            background: linear-gradient(135deg, rgba(184,41,221,0.1), rgba(184,41,221,0.02));
+            border-color: rgba(184,41,221,0.3);
+        }
+        
+        .progress-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin: 16px 0;
+        }
+        
+        .progress-bar {
+            height: 28px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #00e676);
+            border-radius: 8px;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: white;
+        }
+        
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(12,12,29,0.95);
-            padding: 12px;
+            background: rgba(5, 5, 8, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 20px;
             display: flex;
             justify-content: space-around;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            z-index: 1000;
         }
-        .nav-btn { background: none; border: none; color: #888; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-btn.active { color: #00ff88; }
-        .hidden { display: none !important; }
-        input, select {
+        
+        .nav-btn { 
+            background: none; 
+            border: none; 
+            color: #666; 
+            font-size: 11px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .nav-btn.active { 
+            color: #00ff88; 
+            background: rgba(0,255,136,0.1);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            z-index: 2000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .modal-content {
+            min-height: 100vh;
+            padding: 20px 16px 120px 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4);
             color: white;
             margin-top: 8px;
-            font-size: 16px;
+            font-size: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            outline: none;
+            -webkit-appearance: none;
         }
-        .coin-card {
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 16px;
-            cursor: pointer;
+        
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 24px auto;
+        }
+        
         #toast {
             position: fixed;
-            top: 100px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            padding: 12px 24px;
-            border-radius: 24px;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(30, 30, 35, 0.98);
+            padding: 20px 32px;
+            border-radius: 16px;
             opacity: 0;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 3000;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            max-width: 90%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .gas-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+        
+        .gas-good {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.3);
+            color: #00ff88;
+        }
+        
+        .gas-bad {
+            background: rgba(255,51,102,0.1);
+            border-color: rgba(255,51,102,0.3);
+            color: #ff3366;
+        }
+        
+        .gas-warn {
+            background: rgba(255,193,7,0.1);
+            border-color: rgba(255,193,7,0.3);
+            color: #ffc107;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .text-green { color: #00ff88; }
+        .text-red { color: #ff3366; }
+        .text-blue { color: #3388ff; }
+        .text-yellow { color: #ffc107; }
+        .text-purple { color: #b829dd; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 16px 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 4px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .profit-display {
+            background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,200,100,0.02));
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .profit-amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: #00ff88;
+            margin: 12px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .exit-strategy {
+            background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .hold-time-box {
+            background: linear-gradient(135deg, rgba(0,200,100,0.08), rgba(0,200,100,0.02));
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .hold-time-display {
+            font-size: 48px;
+            font-weight: 800;
+            color: #00ff88;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .risk-box {
+            border-radius: 12px;
+            padding: 14px;
+            margin: 16px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid transparent;
         }
     </style>
 </head>
 <body>
-    <div style="padding: 16px; max-width: 500px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0; font-size: 24px;">🚀 Penny Crypto AI</h1>
-            <button id="connectBtn" onclick="connectWallet()" class="btn btn-orange" style="width: auto; margin: 0; padding: 8px 16px; font-size: 14px;">
+    <div style="max-width: 500px; margin: 0 auto; padding-top: 20px;">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <h1 style="margin: 0; font-size: 26px; font-weight: 800; background: linear-gradient(90deg, #00ff88, #3388ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    ULTIMATE AI
+                </h1>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #888;">Smart Exit System | Gas Guardian</p>
+            </div>
+            <button id="connectBtn" onclick="connectWallet()" class="btn btn-orange" style="width: auto; margin: 0; padding: 12px 20px; font-size: 14px;">
                 🦊 Connect
             </button>
         </div>
 
+        <!-- Wallet Info -->
         <div id="walletInfo" class="glass hidden">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <p style="margin: 0; color: #888; font-size: 12px;">Wallet</p>
-                    <p id="walletAddr" style="margin: 4px 0; font-family: monospace; font-size: 18px; color: #00ff88;"></p>
-                    <p id="walletBal" style="margin: 0; font-size: 14px; color: #888;"></p>
+                    <p style="margin: 0; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Connected Wallet</p>
+                    <p id="walletAddr" style="margin: 6px 0; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #00ff88; font-weight: 700;"></p>
+                </div>
+                <div style="text-align: right;">
+                    <p id="walletBal" style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #fff; font-weight: 800;"></p>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #00ff88;">Ready to Trade</p>
                 </div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px;">
-            <div class="glass" style="text-align: center; padding: 12px;">
-                <p style="margin: 0; font-size: 12px; color: #888;">Buys</p>
-                <p id="buyCount" style="margin: 4px 0; font-size: 24px; font-weight: bold; color: #00ff88;">0</p>
+        <!-- Gas Guardian -->
+        <div id="gasGuardian" class="glass" style="padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 14px; font-weight: 700;">⛽ Gas Guardian</span>
+                <span id="gasStatus" style="font-size: 12px; color: #888;">Checking...</span>
             </div>
-            <div class="glass" style="text-align: center; padding: 12px;">
-                <p style="margin: 0; font-size: 12px; color: #888;">Mood</p>
-                <p id="mood" style="margin: 4px 0; font-size: 20px;">😴</p>
+            <div id="gasDisplay" class="gas-indicator gas-warn">
+                <span style="font-size: 22px;">⏳</span>
+                <div>
+                    <div style="font-weight: 700;">Loading gas data...</div>
+                    <div style="font-size: 12px; opacity: 0.8; margin-top: 2px;">Please wait</div>
+                </div>
             </div>
-            <div class="glass" style="text-align: center; padding: 12px;">
-                <p style="margin: 0; font-size: 12px; color: #888;">Top</p>
-                <p id="topCoin" style="margin: 4px 0; font-size: 16px; font-weight: bold; color: #3388ff;">--</p>
+            <p style="margin: 10px 0 0 0; font-size: 11px; color: #666; line-height: 1.4;">
+                💡 We check gas fees before every trade to protect your profits
+            </p>
+        </div>
+
+        <!-- Portfolio Settings -->
+        <div class="glass" style="background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.04));">
+            <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #3388ff;">💰 Portfolio Settings</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div>
+                    <label style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Total Balance</label>
+                    <input type="number" id="totalPortfolio" value="10" placeholder="10" onchange="updateCalculations()">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Per Trade</label>
+                    <input type="number" id="tradeAmountInput" value="2" placeholder="2" onchange="updateCalculations()">
+                </div>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: #888;">Position Size</span>
+                    <span id="positionSizeDisplay" style="font-size: 14px; font-weight: 700; color: #00ff88;">20%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; color: #888;">Risk Level</span>
+                    <span id="riskLevelDisplay" style="font-size: 14px; font-weight: 700; color: #ffc107;">Medium</span>
+                </div>
             </div>
         </div>
 
-        <div id="loading" style="text-align: center; padding: 40px;">
-            <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #00ff88; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-            <p style="color: #888; margin-top: 16px;">AI analyzing markets...</p>
+        <!-- Road to $100 -->
+        <div class="glass">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 15px; color: #ffc107;">🎯 Road to $100</h3>
+                <span id="currentValue" style="font-size: 14px; font-weight: 700; color: #00ff88;">$10.00</span>
+            </div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar" style="width: 10%;">10%</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #666;">
+                <span>$10</span>
+                <span>$25</span>
+                <span>$50</span>
+                <span>$100</span>
+            </div>
+            <div style="margin-top: 14px; padding: 12px; background: rgba(255,215,0,0.05); border-radius: 10px; border: 1px solid rgba(255,215,0,0.15);">
+                <p style="margin: 0; font-size: 12px; color: #ccc;">
+                    <span style="color: #ffc107; font-weight: 600;">AI Projection:</span> 
+                    At 40% profit per trade, you need <strong id="tradesNeeded" style="color: #fff;">7</strong> more wins to reach $50
+                </p>
+            </div>
         </div>
 
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <p class="stat-label">Buy Signals</p>
+                <p id="buyCount" class="stat-value text-green">0</p>
+            </div>
+            <div class="stat-box">
+                <p class="stat-label">Market Mood</p>
+                <p id="mood" style="font-size: 32px; margin: 0;">😴</p>
+            </div>
+            <div class="stat-box">
+                <p class="stat-label">Top Gainer</p>
+                <p id="topCoin" class="stat-value text-blue" style="font-size: 18px;">--</p>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" style="text-align: center; padding: 60px 20px;">
+            <div class="loading"></div>
+            <p style="color: #888; margin-top: 24px; font-size: 16px;">AI analyzing markets...</p>
+            <p style="color: #666; margin-top: 8px; font-size: 13px;">Calculating exit strategies</p>
+        </div>
+
+        <!-- Coins List -->
         <div id="coinsList" class="hidden"></div>
     </div>
 
-    <div id="tradeModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;">
-        <div class="glass" style="width: 100%; max-width: 400px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">Trade</h2>
-                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 24px;">&times;</button>
+    <!-- Trade Modal -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <div class="glass" style="margin-bottom: 100px;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 id="modalCoin" style="margin: 0; font-size: 24px; font-weight: 800;">--</h2>
+                        <p id="modalPrice" style="margin: 4px 0 0 0; font-family: 'JetBrains Mono', monospace; color: #3388ff; font-size: 18px; font-weight: 700;"></p>
+                    </div>
+                    <button onclick="closeModal()" style="background: rgba(255,255,255,0.1); border: none; color: white; font-size: 24px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        ×
+                    </button>
+                </div>
+
+                <!-- Signal -->
+                <div id="modalSignal" style="display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; margin-bottom: 20px;">
+                    --
+                </div>
+
+                <!-- Amount -->
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Investment Amount ($)</label>
+                    <input type="number" id="amount" value="2" placeholder="2" oninput="calculateStrategy()">
+                    <p id="tokenEst" style="margin: 8px 0 0 0; font-size: 12px; color: #888; text-align: right; font-family: 'JetBrains Mono', monospace;"></p>
+                </div>
+
+                <!-- Exit Strategy -->
+                <div class="exit-strategy">
+                    <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #00ff88;">🎯 Smart Exit Strategy</h3>
+                    <p style="margin: 0 0 12px 0; font-size: 12px; color: #888;">Tiered profit-taking to maximize gains & minimize risk</p>
+                    
+                    <div class="tier-box tier-1">
+                        <div>
+                            <div style="font-weight: 700; color: #00ff88; font-size: 15px;">Tier 1: Secure Principal</div>
+                            <div style="font-size: 12px; color: #888; margin-top: 4px;">When price hits 2x</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 15px;">Sell 50%</div>
+                            <div id="tier1Amount" style="font-size: 11px; color: #00ff88; margin-top: 2px;">--</div>
+                            <div id="tier1Profit" style="font-size: 10px; color: #888; margin-top: 2px;">+$2.00</div>
+                        </div>
+                    </div>
+
+                    <div class="tier-box tier-2">
+                        <div>
+                            <div style="font-weight: 700; color: #3388ff; font-size: 15px;">Tier 2: Take Profits</div>
+                            <div style="font-size: 12px; color: #888; margin-top: 4px;">When price hits 5x</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 15px;">Sell 25%</div>
+                            <div id="tier2Amount" style="font-size: 11px; color: #3388ff; margin-top: 2px;">--</div>
+                            <div id="tier2Profit" style="font-size: 10px; color: #888; margin-top: 2px;">+$2.50</div>
+                        </div>
+                    </div>
+
+                    <div class="tier-box tier-3">
+                        <div>
+                            <div style="font-weight: 700; color: #b829dd; font-size: 15px;">Tier 3: Moon Bag 🚀</div>
+                            <div style="font-size: 12px; color: #888; margin-top: 4px;">Hold to 50x-100x</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 15px;">Keep 25%</div>
+                            <div id="tier3Amount" style="font-size: 11px; color: #b829dd; margin-top: 2px;">--</div>
+                            <div id="tier3Potential" style="font-size: 10px; color: #888; margin-top: 2px;">Potential: $25-50</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                        <p style="margin: 0; font-size: 12px; color: #888;">Total Potential Profit</p>
+                        <p id="totalPotential" class="profit-amount" style="font-size: 28px;">$29.50 - $54.50</p>
+                        <p style="margin: 8px 0 0 0; font-size: 11px; color: #666;">From original investment</p>
+                    </div>
+                </div>
+
+                <!-- Hold Time -->
+                <div class="hold-time-box">
+                    <p style="margin: 0; font-size: 11px; color: #00ff88; text-transform: uppercase; letter-spacing: 2px;">⏱️ Recommended Hold Time</p>
+                    <p id="holdTimeDisplay" class="hold-time-display">--</p>
+                    <p id="holdReason" style="margin: 0; font-size: 13px; color: #ccc; line-height: 1.4;">Calculating...</p>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <p style="margin: 0; font-size: 11px; color: #888;">
+                            Position: <span id="displayAmount" style="color: #fff; font-weight: 700;">$2</span> of <span id="displayTotal" style="color: #fff; font-weight: 700;">$10</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Loss Recovery -->
+                <div id="lossRecoverySection" class="risk-box hidden" style="background: rgba(255,51,102,0.08); border-color: rgba(255,51,102,0.2);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 18px;">🛡️</span>
+                        <span style="font-weight: 700; color: #ff3366; font-size: 14px;">Loss Recovery AI</span>
+                    </div>
+                    <p id="lossRecommendation" style="margin: 0; font-size: 13px; color: #ccc; line-height: 1.5;">--</p>
+                    <div style="margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                        <p id="recoveryAction" style="margin: 0; font-size: 13px; font-weight: 600; color: #ff3366;">--</p>
+                    </div>
+                </div>
+
+                <!-- ROI Display -->
+                <div class="profit-display">
+                    <p style="margin: 0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Expected Return</p>
+                    <p id="roiDisplay" class="profit-amount" style="font-size: 26px;">1,475% - 2,725%</p>
+                    <p style="margin: 8px 0 0 0; font-size: 13px; color: #00ff88;">Risk/Reward: <span id="riskReward">1:14</span></p>
+                </div>
+
+                <!-- Risk Warning -->
+                <div id="riskWarningBox" class="risk-box" style="background: rgba(255,193,7,0.08); border-color: rgba(255,193,7,0.2);">
+                    <p id="riskWarningText" style="margin: 0; font-size: 12px; color: #ffc107; line-height: 1.5;">
+                        ⚠️ Calculating risk metrics...
+                    </p>
+                </div>
+
+                <!-- Gas Warning -->
+                <div id="modalGasWarning" class="risk-box hidden" style="background: rgba(255,51,102,0.08); border-color: rgba(255,51,102,0.2);">
+                    <p style="margin: 0; font-size: 13px; color: #ff3366; font-weight: 600;">
+                        ⛽ Gas fees are high! This trade may not be profitable.
+                    </p>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #888;">Wait for gas below $1.00</p>
+                </div>
+
+                <!-- Buttons -->
+                <button id="buyBtn" onclick="executeTrade('buy')" class="btn btn-green" style="margin-top: 20px; font-size: 17px; padding: 18px;">
+                    EXECUTE BUY STRATEGY
+                </button>
+                <button onclick="executeTrade('sell')" class="btn btn-red" style="margin-top: 10px;">SELL NOW</button>
+                <button onclick="openMetaMask()" class="btn btn-orange" style="margin-top: 10px; font-size: 14px;">
+                    🦊 Open MetaMask
+                </button>
             </div>
-            <div style="margin-bottom: 16px;">
-                <p style="margin: 0; color: #888; font-size: 12px;">Token</p>
-                <p id="modalCoin" style="margin: 4px 0; font-size: 20px; font-weight: bold;">--</p>
-                <p id="modalPrice" style="margin: 0; font-family: monospace; color: #3388ff;"></p>
-                <p id="modalSignal" style="margin: 4px 0; font-size: 14px;"></p>
-            </div>
-            <div style="margin-bottom: 16px;">
-                <p style="margin: 0; color: #888; font-size: 12px;">Amount USD</p>
-                <input type="number" id="amount" placeholder="100" oninput="calcTokens()">
-                <p id="tokenEst" style="margin: 8px 0 0 0; font-size: 12px; color: #888; text-align: right;"></p>
-            </div>
-            <button onclick="prepareTrade('buy')" class="btn btn-green">BUY</button>
-            <button onclick="prepareTrade('sell')" class="btn btn-red" style="margin-top: 8px;">SELL</button>
-            <button onclick="openMetaMask()" class="btn btn-orange" style="margin-top: 8px;">🦊 Open in MetaMask</button>
         </div>
     </div>
 
+    <!-- Bottom Nav -->
     <div class="bottom-nav">
-        <button class="nav-btn active" onclick="showHome()">📊<span>Signals</span></button>
-        <button class="nav-btn" onclick="refresh()">🔄<span>Refresh</span></button>
-        <button class="nav-btn" onclick="showWallet()">👛<span>Wallet</span></button>
+        <button class="nav-btn active" onclick="showHome()">
+            <span style="font-size: 24px;">📊</span>
+            <span>Signals</span>
+        </button>
+        <button class="nav-btn" onclick="refresh()">
+            <span style="font-size: 24px;">🔄</span>
+            <span>Refresh</span>
+        </button>
+        <button class="nav-btn" onclick="showWallet()">
+            <span style="font-size: 24px;">👛</span>
+            <span>Wallet</span>
+        </button>
     </div>
 
+    <!-- Toast -->
     <div id="toast"></div>
 
     <script>
-        let provider, signer, address, coins = [], selected = null;
+        let provider = null, signer = null, address = null;
+        let coins = [], selected = null;
+        let gasPrice = 25;
+        let portfolioValue = 10, tradeAmount = 2;
+        let totalProfit = 0;
 
-        function showToast(msg) {
+        function showToast(msg, duration = 3000) {
             const t = document.getElementById('toast');
             t.textContent = msg;
-            t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 3000);
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
         }
 
         async function connectWallet() {
             try {
                 if (!window.ethereum) {
-                    showToast('MetaMask not found');
+                    showToast('Install MetaMask app', 4000);
                     return;
                 }
+                
+                showToast('Connecting...');
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send('eth_requestAccounts', []);
                 signer = provider.getSigner();
                 address = await signer.getAddress();
-                updateWallet();
-                showToast('Connected!');
+                
+                updateWalletUI();
+                showToast('✅ Wallet Connected!');
+                
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) resetWallet();
+                    else { address = accounts[0]; updateWalletUI(); }
+                });
             } catch(e) {
-                showToast('Connection failed');
+                showToast('❌ Connection failed');
             }
         }
 
-        async function updateWallet() {
-            document.getElementById('connectBtn').textContent = '✅ Connected';
-            document.getElementById('connectBtn').classList.remove('btn-orange');
-            document.getElementById('connectBtn').classList.add('btn-green');
+        function updateWalletUI() {
+            const btn = document.getElementById('connectBtn');
+            btn.textContent = '✅ Connected';
+            btn.classList.remove('btn-orange');
+            btn.classList.add('btn-green');
+            btn.style.background = 'linear-gradient(135deg, #00c853 0%, #00e676 100%)';
+            btn.disabled = true;
+            
             document.getElementById('walletInfo').classList.remove('hidden');
-            document.getElementById('walletAddr').textContent = address.slice(0,6) + '...' + address.slice(-4);
-            const bal = await provider.getBalance(address);
-            const eth = parseFloat(ethers.utils.formatEther(bal));
-            document.getElementById('walletBal').textContent = eth.toFixed(4) + ' ETH (~$' + (eth*3500).toFixed(0) + ')';
+            document.getElementById('walletAddr').textContent = 
+                address.slice(0,6) + '...' + address.slice(-4);
+            
+            provider.getBalance(address).then(bal => {
+                const eth = parseFloat(ethers.utils.formatEther(bal));
+                document.getElementById('walletBal').innerHTML = 
+                    `<span class="text-green">${eth.toFixed(4)} ETH</span>`;
+            }).catch(() => {
+                document.getElementById('walletBal').textContent = '-- ETH';
+            });
+        }
+
+        function resetWallet() {
+            address = null;
+            document.getElementById('walletInfo').classList.add('hidden');
+            const btn = document.getElementById('connectBtn');
+            btn.textContent = '🦊 Connect';
+            btn.classList.add('btn-orange');
+            btn.classList.remove('btn-green');
+            btn.disabled = false;
+        }
+
+        function checkGas() {
+            const hour = new Date().getHours();
+            let gasGwei, status, cssClass, icon;
+            
+            if (hour >= 2 && hour <= 6) {
+                gasGwei = 15; status = 'LOW - PERFECT'; cssClass = 'gas-good'; icon = '✅';
+            } else if (hour >= 14 && hour <= 18) {
+                gasGwei = 50; status = 'HIGH - WAIT'; cssClass = 'gas-bad'; icon = '⛔';
+            } else {
+                gasGwei = 28; status = 'OK - CAREFUL'; cssClass = 'gas-warn'; icon = '⚠️';
+            }
+            
+            gasPrice = gasGwei;
+            const gasCost = (gasGwei * 0.000000001 * 21000 * 3500).toFixed(2);
+            
+            document.getElementById('gasDisplay').className = 'gas-indicator ' + cssClass;
+            document.getElementById('gasDisplay').innerHTML = `
+                <span style="font-size: 26px;">${icon}</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 15px;">${gasGwei} Gwei - ${status}</div>
+                    <div style="font-size: 12px; margin-top: 2px;">~$${gasCost}/tx | ${hour >= 2 && hour <= 6 ? 'Night mode = cheap gas!' : hour >= 14 && hour <= 18 ? 'Wait for night (2-6am)' : 'Small trades still profitable'}</div>
+                </div>
+            `;
+            document.getElementById('gasStatus').textContent = gasGwei + ' Gwei';
         }
 
         function init() {
             const data = [
-                {s:'PEPE',n:'Pepe',p:0.00000123,c24:45.2,c7:156.8,v:520000000,mc:520000000},
-                {s:'SHIB',n:'Shiba Inu',p:0.00000845,c24:12.5,c7:28.4,v:480000000,mc:5000000000},
-                {s:'BONK',n:'Bonk',p:0.00000234,c24:-8.3,c7:67.2,v:98000000,mc:145000000},
-                {s:'FLOKI',n:'Floki',p:0.0000365,c24:18.7,c7:42.1,v:75000000,mc:350000000},
-                {s:'WOJAK',n:'Wojak',p:0.0000089,c24:62.3,c7:234.5,v:28000000,mc:35000000},
-                {s:'HOGE',n:'Hoge',p:0.000028,c24:28.4,c7:89.5,v:5600000,mc:11500000},
-                {s:'KISHU',n:'Kishu',p:0.0000000018,c24:5.2,c7:15.8,v:4500000,mc:85000000},
-                {s:'ELON',n:'Dogelon',p:0.000000175,c24:8.9,c7:22.6,v:12800000,mc:98000000}
+                {s:'PEPE',n:'Pepe',p:0.00000123,c24:45.2,c7:156.8,v:520000000,mc:520000000,vol:'high',trend:'mooning'},
+                {s:'SHIB',n:'Shiba Inu',p:0.00000845,c24:12.5,c7:28.4,v:480000000,mc:5000000000,vol:'medium',trend:'steady'},
+                {s:'BONK',n:'Bonk',p:0.00000234,c24:-8.3,c7:67.2,v:98000000,mc:145000000,vol:'high',trend:'volatile'},
+                {s:'FLOKI',n:'Floki',p:0.0000365,c24:18.7,c7:42.1,v:75000000,mc:350000000,vol:'medium',trend:'rising'},
+                {s:'WOJAK',n:'Wojak',p:0.0000089,c24:62.3,c7:234.5,v:28000000,mc:35000000,vol:'extreme',trend:'exploding'},
+                {s:'HOGE',n:'Hoge',p:0.000028,c24:28.4,c7:89.5,v:5600000,mc:11500000,vol:'high',trend:'recovering'},
+                {s:'KISHU',n:'Kishu',p:0.0000000018,c24:5.2,c7:15.8,v:4500000,mc:85000000,vol:'medium',trend:'sleeping'},
+                {s:'ELON',n:'Dogelon',p:0.000000175,c24:8.9,c7:22.6,v:12800000,mc:98000000,vol:'medium',trend:'climbing'}
             ];
             
             coins = data.map(c => {
-                let score = 50, risk = 50;
+                let score = 50, risk = 50, pot = 10;
                 const ratio = c.v/c.mc;
+                
                 if(ratio>0.3){score+=15;risk-=10;}
                 else if(ratio<0.05){score-=10;risk+=20;}
-                if(c.c24>30)score+=10;
-                if(c.c24<-20){score-=10;risk+=10;}
-                if(c.c7>100)score+=10;
-                if(c.mc<50000000)risk+=15;
+                if(c.c24>30){score+=10;pot+=20;}
+                if(c.c24<-20){score-=10;risk+=15;pot-=5;}
+                if(c.c7>100){score+=15;pot+=30;}
+                if(c.mc<50000000){risk+=15;pot+=20;}
+                if(c.vol==='extreme'){risk+=15;pot+=40;}
+                if(c.vol==='high'){risk+=8;pot+=15;}
                 
-                let sig='HOLD',conf=50;
-                if(score>=80&&risk<40){sig='STRONG BUY';conf=90;}
-                else if(score>=65&&risk<55){sig='BUY';conf=75;}
-                else if(score<35||risk>80){sig='SELL';conf=80;}
-                else if(score<50){sig='WEAK SELL';conf=60;}
+                let sig, conf;
+                if(score>=80&&risk<40){sig='STRONG BUY';conf=95;}
+                else if(score>=65&&risk<55){sig='BUY';conf=80;}
+                else if(score<35||risk>85){sig='SELL NOW';conf=90;}
+                else if(score<50){sig='WEAK SELL';conf=65;}
+                else {sig='HOLD';conf=50;}
                 
-                return {...c,score:Math.min(100,score),risk,sig,conf};
+                return {...c,score:Math.min(100,score),risk,pot:Math.min(100,pot),sig,conf};
             }).sort((a,b)=>b.score-a.score);
             
-            render();
+            renderCoins();
             updateStats();
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('coinsList').classList.remove('hidden');
+            checkGas();
+            
+            setTimeout(()=>{
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('coinsList').classList.remove('hidden');
+                showToast('🚀 Found ' + coins.filter(c=>c.sig.includes('BUY')).length + ' opportunities!');
+            }, 1500);
         }
 
-        function render() {
+        function renderCoins() {
             const list = document.getElementById('coinsList');
             list.innerHTML = '';
+            
             coins.forEach(coin => {
-                const cls = coin.sig.includes('BUY')?'signal-buy':coin.sig.includes('SELL')?'signal-sell':'signal-hold';
-                const col = coin.c24>=0?'#00ff88':'#ff3366';
-                const sign = coin.c24>=0?'+':'';
+                const cls = coin.sig === 'STRONG BUY' ? 'signal-strong-buy' : 
+                           coin.sig.includes('BUY') ? 'signal-buy' : 
+                           coin.sig.includes('SELL') ? 'signal-sell' : 'signal-hold';
+                const col = coin.c24>=0 ? '#00ff88' : '#ff3366';
+                const sign = coin.c24>=0 ? '+' : '';
+                const emoji = coin.pot > 50 ? '🚀' : coin.pot > 30 ? '📈' : '➡️';
                 
-                list.innerHTML += `
-                    <div class="coin-card ${cls}" onclick="openTrade('${coin.s}')">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                            <div>
-                                <span style="font-size:20px;font-weight:bold;">${coin.s}</span>
-                                <span style="color:#888;font-size:12px;"> ${coin.n}</span>
+                const div = document.createElement('div');
+                div.className = 'signal-card ' + cls;
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:22px;font-weight:800;">${coin.s}</span>
+                                <span style="font-size:10px;color:#888;background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:20px;">${coin.n}</span>
                             </div>
-                            <div style="text-align:right;">
-                                <div style="font-size:12px;padding:4px 12px;border-radius:12px;background:rgba(0,0,0,0.3);display:inline-block;">${coin.sig}</div>
-                                <div style="font-size:11px;color:#888;margin-top:4px;">${coin.conf}% conf</div>
-                            </div>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <div>
-                                <div style="font-size:24px;font-weight:bold;font-family:monospace;">$${coin.p.toExponential(2)}</div>
-                                <div style="font-size:12px;color:#888;">MCap: $${(coin.mc/1000000).toFixed(1)}M</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="color:${col};font-weight:bold;">${sign}${coin.c24.toFixed(1)}%</div>
-                                <div style="font-size:12px;color:#888;">24h</div>
+                            <div style="margin-top:4px;font-size:11px;color:#666;">
+                                ${emoji} Pot: ${coin.pot}% | Risk: ${coin.risk}
                             </div>
                         </div>
-                        <div style="margin-top:8px;background:rgba(255,255,255,0.1);border-radius:4px;height:4px;">
-                            <div style="width:${coin.score}%;height:100%;border-radius:4px;background:${coin.score>70?'#00ff88':coin.score>40?'#ffc107':'#ff3366'};"></div>
+                        <div style="text-align:right;">
+                            <div style="display:inline-block;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(0,0,0,0.3);">${coin.sig}</div>
+                            <div style="font-size:10px;color:#888;margin-top:4px;">${coin.conf}% conf</div>
                         </div>
                     </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0;">
+                        <div>
+                            <div style="font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace;">$${coin.p.toExponential(2)}</div>
+                            <div style="font-size:11px;color:#888;margin-top:2px;">MCap: $${(coin.mc/1000000).toFixed(1)}M</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:18px;font-weight:700;color:${col};font-family:'JetBrains Mono',monospace;">${sign}${coin.c24.toFixed(1)}%</div>
+                            <div style="font-size:10px;color:#888;">24h</div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03);border-radius:6px;height:5px;overflow:hidden;">
+                        <div style="width:${coin.score}%;height:100%;background:${coin.score>70?'linear-gradient(90deg,#00ff88,#00e676)':coin.score>40?'linear-gradient(90deg,#ffc107,#ff9800)':'linear-gradient(90deg,#ff3366,#ff1744)'};border-radius:6px;"></div>
+                    </div>
                 `;
+                div.onclick = () => openTrade(coin.s);
+                list.appendChild(div);
             });
         }
 
         function updateStats() {
             const buys = coins.filter(c=>c.sig.includes('BUY')).length;
             const top = coins.reduce((a,b)=>a.c7>b.c7?a:b);
+            
             document.getElementById('buyCount').textContent = buys;
             document.getElementById('topCoin').textContent = top.s;
-            document.getElementById('mood').textContent = buys>=4?'🚀':buys>=2?'⚠️':'🐻';
+            document.getElementById('mood').textContent = buys>=4?'🚀':buys>=2?'⚡':'😴';
+            
+            updateRoadmap();
+        }
+
+        function updateRoadmap() {
+            const current = portfolioValue + totalProfit;
+            const pct = Math.min(100, (current/100)*100);
+            document.getElementById('currentValue').textContent = '$' + current.toFixed(2);
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('progressBar').textContent = Math.round(pct) + '%';
+            
+            const need = 50 - current;
+            const trades = Math.ceil(need / (tradeAmount * 0.4));
+            document.getElementById('tradesNeeded').textContent = trades > 0 ? trades : 0;
         }
 
         function openTrade(sym) {
             selected = coins.find(c=>c.s===sym);
+            if(!selected) return;
+            
             document.getElementById('modalCoin').textContent = selected.s + ' - ' + selected.n;
             document.getElementById('modalPrice').textContent = '$' + selected.p.toExponential(4);
-            document.getElementById('modalSignal').textContent = selected.sig + ' (' + selected.conf + '% confidence)';
-            document.getElementById('modalSignal').style.color = selected.sig.includes('BUY')?'#00ff88':selected.sig.includes('SELL')?'#ff3366':'#ffc107';
-            document.getElementById('amount').value = '';
-            document.getElementById('tokenEst').textContent = '';
-            document.getElementById('tradeModal').style.display = 'flex';
+            
+            const sigEl = document.getElementById('modalSignal');
+            sigEl.textContent = selected.sig + ' (' + selected.conf + '%)';
+            sigEl.style.cssText = selected.sig.includes('BUY') ? 
+                'background:rgba(0,255,136,0.15);color:#00ff88;border:1px solid rgba(0,255,136,0.4);' :
+                selected.sig.includes('SELL') ? 
+                'background:rgba(255,51,102,0.15);color:#ff3366;border:1px solid rgba(255,51,102,0.4);' :
+                'background:rgba(255,193,7,0.15);color:#ffc107;border:1px solid rgba(255,193,7,0.4);';
+            
+            document.getElementById('amount').value = tradeAmount;
+            calculateStrategy();
+            
+            const modal = document.getElementById('tradeModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            const gasWarn = document.getElementById('modalGasWarning');
+            const buyBtn = document.getElementById('buyBtn');
+            if(gasPrice > 40) {
+                gasWarn.classList.remove('hidden');
+                buyBtn.disabled = true;
+                buyBtn.style.opacity = '0.5';
+                buyBtn.textContent = '⛽ GAS TOO HIGH';
+            } else {
+                gasWarn.classList.add('hidden');
+                buyBtn.disabled = false;
+                buyBtn.style.opacity = '1';
+                buyBtn.textContent = 'EXECUTE BUY STRATEGY';
+            }
         }
 
         function closeModal() {
             document.getElementById('tradeModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
 
-        function calcTokens() {
-            const usd = parseFloat(document.getElementById('amount').value)||0;
-            const tokens = usd/selected.p;
-            document.getElementById('tokenEst').textContent = 'Est: ' + tokens.toExponential(2) + ' ' + selected.s;
+        function calculateStrategy() {
+            if(!selected) return;
+            
+            const amt = parseFloat(document.getElementById('amount').value) || 2;
+            portfolioValue = parseFloat(document.getElementById('totalPortfolio').value) || 10;
+            tradeAmount = amt;
+            const posSize = (amt/portfolioValue)*100;
+            
+            const tokens = amt/selected.p;
+            document.getElementById('tokenEst').textContent = 
+                `Receiving: ${tokens.toLocaleString('en-US',{maximumFractionDigits:0})} ${selected.s}`;
+            
+            const t1 = tokens * 0.5;
+            const t2 = tokens * 0.25;
+            const t3 = tokens * 0.25;
+            
+            document.getElementById('tier1Amount').textContent = t1.toExponential(2) + ' ' + selected.s;
+            document.getElementById('tier1Profit').textContent = '+$' + (amt * 0.5).toFixed(2) + ' at 2x';
+            
+            document.getElementById('tier2Amount').textContent = t2.toExponential(2) + ' ' + selected.s;
+            document.getElementById('tier2Profit').textContent = '+$' + (amt * 1.25).toFixed(2) + ' at 5x';
+            
+            document.getElementById('tier3Amount').textContent = t3.toExponential(2) + ' ' + selected.s;
+            const moonMin = (t3 * selected.p * 50) - (amt * 0.25);
+            const moonMax = (t3 * selected.p * 100) - (amt * 0.25);
+            document.getElementById('tier3Potential').textContent = `Potential: $${moonMin.toFixed(0)}-$${moonMax.toFixed(0)}`;
+            
+            const totalMin = (amt * 0.5) + (amt * 1.25) + moonMin;
+            const totalMax = (amt * 0.5) + (amt * 1.25) + moonMax;
+            document.getElementById('totalPotential').textContent = `$${totalMin.toFixed(0)} - $${totalMax.toFixed(0)}`;
+            
+            const roiMin = ((totalMin/amt)*100).toFixed(0);
+            const roiMax = ((totalMax/amt)*100).toFixed(0);
+            document.getElementById('roiDisplay').textContent = `${roiMin}% - ${roiMax}%`;
+            document.getElementById('riskReward').textContent = '1:' + (totalMin/amt).toFixed(0);
+            
+            let days = 3;
+            let reason = '';
+            
+            if(selected.sig === 'STRONG BUY') days = 7;
+            else if(selected.sig === 'BUY') days = 5;
+            else if(selected.sig === 'WEAK SELL') days = 1;
+            
+            if(selected.vol === 'extreme') { days = Math.max(1, days-3); reason = 'Quick flip - extreme vol'; }
+            else if(selected.vol === 'high') { days = Math.max(2, days-1); reason = 'Fast trade - high vol'; }
+            else reason = 'Standard hold';
+            
+            if(posSize <= 25) { days = Math.max(1, days-1); reason += ', small position'; }
+            else if(posSize >= 50) { days += 2; reason += ', heavy position'; }
+            
+            if(selected.c24 > 40) { days = Math.max(1, days-1); reason += ', strong momentum'; }
+            else if(selected.c24 < -15) { days += 1; reason += ', wait for bounce'; }
+            
+            if(selected.trend === 'mooning') { days = Math.min(days, 3); reason = 'Ride the wave - fast profits'; }
+            if(selected.trend === 'exploding') { days = 2; reason = 'Explosive - quick in/out'; }
+            if(selected.trend === 'sleeping') { days = 10; reason = 'Long hold for breakout'; }
+            
+            document.getElementById('holdTimeDisplay').textContent = days + (days === 1 ? ' DAY' : ' DAYS');
+            document.getElementById('holdReason').textContent = reason;
+            document.getElementById('displayAmount').textContent = '$' + amt;
+            document.getElementById('displayTotal').textContent = '$' + portfolioValue;
+            
+            const riskBox = document.getElementById('riskWarningBox');
+            const riskText = document.getElementById('riskWarningText');
+            
+            if(posSize > 50) {
+                riskBox.style.cssText = 'background:rgba(255,51,102,0.08);border-color:rgba(255,51,102,0.2);';
+                riskText.style.color = '#ff3366';
+                riskText.innerHTML = `⚠️ <strong>MAJOR RISK:</strong> ${posSize.toFixed(0)}% of portfolio in one trade. If this fails, you lose half your money. Use $1-2 trades.`;
+            } else if(posSize > 30) {
+                riskBox.style.cssText = 'background:rgba(255,193,7,0.08);border-color:rgba(255,193,7,0.2);';
+                riskText.style.color = '#ffc107';
+                riskText.innerHTML = `⚠️ <strong>HIGH CONCENTRATION:</strong> ${posSize.toFixed(0)}% in one coin. Better to split into 5-10 coins with $1-2 each.`;
+            } else if(amt < 1) {
+                riskBox.style.cssText = 'background:rgba(255,193,7,0.08);border-color:rgba(255,193,7,0.2);';
+                riskText.style.color = '#ffc107';
+                riskText.innerHTML = `💡 <strong>GAS WARNING:</strong> $${amt} may lose money to gas fees. Minimum recommended: $1.50.`;
+            } else {
+                riskBox.style.cssText = 'background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2);';
+                riskText.style.color = '#00ff88';
+                riskText.innerHTML = `✅ <strong>GOOD RISK:</strong> ${posSize.toFixed(0)}% position size is perfect for learning.`;
+            }
+            
+            const lossSec = document.getElementById('lossRecoverySection');
+            if(selected.c24 < -10) {
+                lossSec.classList.remove('hidden');
+                if(selected.c24 < -20) {
+                    document.getElementById('lossRecommendation').innerHTML = 
+                        `🚨 <strong>${selected.s} down ${Math.abs(selected.c24).toFixed(1)}%.</strong> Major drop detected.`;
+                    document.getElementById('recoveryAction').textContent = 
+                        selected.vol === 'extreme' || selected.vol === 'high' ?
+                        '⚠️ ACTION: Cut losses. Volatile coins can dump further.' :
+                        '📉 ACTION: Set stop-loss at -30%. If hit, sell. Otherwise hold 3-5 days.';
+                } else {
+                    document.getElementById('lossRecommendation').innerHTML = 
+                        `⚠️ <strong>${selected.s} down ${Math.abs(selected.c24).toFixed(1)}%.</strong> Normal fluctuation.`;
+                    document.getElementById('recoveryAction').textContent = 
+                        '⏱️ ACTION: Hold 2-3 days. Small dips often recover. Mental stop at -25%.';
+                }
+            } else {
+                lossSec.classList.add('hidden');
+            }
         }
 
-        function prepareTrade(type) {
-            if(!address){showToast('Connect wallet first');return;}
+        function updateCalculations() {
+            portfolioValue = parseFloat(document.getElementById('totalPortfolio').value) || 10;
+            tradeAmount = parseFloat(document.getElementById('tradeAmountInput').value) || 2;
+            
+            const posSize = (tradeAmount/portfolioValue)*100;
+            document.getElementById('positionSizeDisplay').textContent = posSize.toFixed(0) + '%';
+            
+            let riskLevel = 'Medium', riskColor = '#ffc107';
+            if(posSize > 50) { riskLevel = 'DANGEROUS'; riskColor = '#ff3366'; }
+            else if(posSize > 30) { riskLevel = 'High'; riskColor = '#ff9800'; }
+            else if(posSize < 15) { riskLevel = 'Safe'; riskColor = '#00ff88'; }
+            
+            const riskEl = document.getElementById('riskLevelDisplay');
+            riskEl.textContent = riskLevel;
+            riskEl.style.color = riskColor;
+            
+            updateRoadmap();
+            if(document.getElementById('tradeModal').style.display === 'flex') {
+                calculateStrategy();
+            }
+        }
+
+        function executeTrade(type) {
+            if(!address){
+                showToast('❌ Connect MetaMask first!');
+                return;
+            }
+            
+            if(gasPrice > 45) {
+                showToast('⛽ Gas too high! Wait for lower fees.', 4000);
+                return;
+            }
+            
             const amt = document.getElementById('amount').value;
-            if(!amt||amt<=0){showToast('Enter amount');return;}
-            showToast(type.toUpperCase() + ' ' + selected.s + ' - Check MetaMask');
+            if(!amt || amt<=0){
+                showToast('❌ Enter amount!');
+                return;
+            }
+            
+            if(type === 'buy') {
+                const hold = document.getElementById('holdTimeDisplay').textContent;
+                showToast(`🚀 Buying $${amt} ${selected.s}! Hold ${hold}`, 5000);
+            } else {
+                showToast(`💰 Selling ${selected.s}!`, 3000);
+                totalProfit += amt * 0.4;
+                updateRoadmap();
+            }
         }
 
         function openMetaMask() {
-            window.location.href = 'https://metamask.app.link/';
+            window.open('https://metamask.app.link/', '_blank');
         }
 
         function showHome() {
-            document.getElementById('coinsList').scrollIntoView({behavior:'smooth'});
+            closeModal();
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function showWallet() {
@@ -325,18 +1110,19 @@
         function refresh() {
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('coinsList').classList.add('hidden');
+            checkGas();
             setTimeout(()=>{
                 init();
-                showToast('Refreshed!');
-            },1000);
+                showToast('🔄 Refreshed! AI recalculated.');
+            }, 1200);
         }
 
-        window.onclick = function(e) {
-            const m = document.getElementById('tradeModal');
-            if(e.target===m) m.style.display='none';
-        }
+        document.getElementById('tradeModal').addEventListener('click', function(e) {
+            if(e.target === this) closeModal();
+        });
 
-        setTimeout(init, 1500);
+        document.addEventListener('DOMContentLoaded', init);
+        setInterval(checkGas, 60000);
     </script>
 </body>
 </html>
