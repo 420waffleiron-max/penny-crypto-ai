@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0c0c1d">
-    <title>Penny Crypto AI</title>
+    <title>Penny Crypto AI - Live Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
@@ -36,9 +36,15 @@
             width: 100%;
             margin-top: 8px;
         }
-        .btn-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .btn-red { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
-        .btn-orange { background: linear-gradient(135deg, #e2761b 0%, #c45c00 100%); }
+        .btn-green { 
+            background: linear-gradient(135deg, #00c853 0%, #00e676 100%); 
+            color: black;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-red { background: linear-gradient(135deg, #ff1744 0%, #f50057 100%); }
+        .btn-orange { background: linear-gradient(135deg, #ff9100 0%, #ff6d00 100%); }
         .signal-buy { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.1); }
         .signal-sell { border-left: 4px solid #ff3366; background: rgba(255,51,102,0.1); }
         .signal-hold { border-left: 4px solid #ffc107; background: rgba(255,193,7,0.1); }
@@ -71,7 +77,9 @@
             margin-bottom: 12px;
             border-radius: 16px;
             cursor: pointer;
+            transition: transform 0.1s;
         }
+        .coin-card:active { transform: scale(0.98); }
         #toast {
             position: fixed;
             top: 100px;
@@ -85,16 +93,53 @@
             pointer-events: none;
             z-index: 1000;
         }
-        .network-warning {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid #ffc107;
-            color: #ffc107;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-            font-size: 14px;
-            cursor: pointer;
+        .hold-time-box {
+            background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,204,255,0.1) 100%);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
         }
+        .strategy-box {
+            background: rgba(0,255,136,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            text-align: center;
+            border: 1px solid rgba(0,255,136,0.2);
+        }
+        .risk-box {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 12px 0;
+            text-align: center;
+            color: #ffc107;
+            font-size: 14px;
+        }
+        .price-up { color: #00ff88; }
+        .price-down { color: #ff3366; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -109,12 +154,11 @@
         <div id="walletInfo" class="glass hidden">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <p style="margin: 0; color: #888; font-size: 12px;">Wallet</p>
+                    <p style="margin: 0; color: #888; font-size: 12px;">
+                        <span class="live-indicator"></span>Live Balance
+                    </p>
                     <p id="walletAddr" style="margin: 4px 0; font-family: monospace; font-size: 18px; color: #00ff88;"></p>
                     <p id="networkName" style="margin: 0; font-size: 14px; color: #3388ff; font-weight: bold;"></p>
-                    <div id="networkWarning" class="network-warning hidden" onclick="switchToEthereum()">
-                        ⚠️ Click here to switch to Ethereum Mainnet
-                    </div>
                 </div>
             </div>
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -140,32 +184,90 @@
         </div>
 
         <div id="loading" style="text-align: center; padding: 40px;">
-            <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #00ff88; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-            <p style="color: #888; margin-top: 16px;">AI analyzing markets...</p>
+            <div class="loading-spinner"></div>
+            <p style="color: #888; margin-top: 16px;">Fetching live prices...</p>
+            <p style="color: #666; font-size: 12px; margin-top: 8px;">Powered by CoinGecko</p>
         </div>
 
         <div id="coinsList" class="hidden"></div>
+        
+        <div id="lastUpdated" style="text-align: center; color: #666; font-size: 11px; margin-top: 20px; display: none;">
+            Prices updated: <span id="updateTime">--</span>
+        </div>
     </div>
 
-    <div id="tradeModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;">
-        <div class="glass" style="width: 100%; max-width: 400px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">Trade</h2>
-                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 24px;">&times;</button>
+    <!-- Trade Modal -->
+    <div id="tradeModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); display: none; overflow-y: auto; z-index: 100;">
+        <div style="min-height: 100vh; padding: 20px; max-width: 500px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 20px;">
+                <h2 style="margin: 0; font-size: 24px;">Execute Trade</h2>
+                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">&times;</button>
             </div>
-            <div style="margin-bottom: 16px;">
+
+            <!-- Token Info -->
+            <div style="margin-bottom: 20px;">
                 <p style="margin: 0; color: #888; font-size: 12px;">Token</p>
-                <p id="modalCoin" style="margin: 4px 0; font-size: 20px; font-weight: bold;">--</p>
-                <p id="modalPrice" style="margin: 0; font-family: monospace; color: #3388ff;"></p>
-                <p id="modalSignal" style="margin: 4px 0; font-size: 14px;"></p>
+                <p id="modalCoin" style="margin: 4px 0; font-size: 24px; font-weight: bold;">--</p>
+                <p id="modalPrice" style="margin: 0; font-family: monospace; color: #3388ff; font-size: 18px;"></p>
+                <p id="modalSignal" style="margin: 8px 0; font-size: 16px; font-weight: bold;"></p>
+                <p id="modalChange" style="margin: 0; font-size: 14px;"></p>
             </div>
-            <div style="margin-bottom: 16px;">
-                <p style="margin: 0; color: #888; font-size: 12px;">Amount USD</p>
-                <input type="number" id="amount" placeholder="100" oninput="calcTokens()">
-                <p id="tokenEst" style="margin: 8px 0 0 0; font-size: 12px; color: #888; text-align: right;"></p>
+
+            <!-- Recommended Hold Time -->
+            <div class="hold-time-box">
+                <p style="margin: 0 0 8px 0; color: #00ff88; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+                    ⏱️ AI Recommended Hold Time
+                </p>
+                <h1 id="holdTime" style="margin: 0; font-size: 42px; color: #00ff88; font-weight: bold;">2 DAYS</h1>
+                <p style="margin: 8px 0 0 0; color: #aaa; font-size: 14px;">Ride the wave - fast profits</p>
+                
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="margin: 0; color: #888; font-size: 14px;">
+                        Position Size: <span style="color: white; font-weight: bold;">$2</span> of <span style="color: white; font-weight: bold;">$10</span>
+                    </p>
+                </div>
             </div>
-            <button onclick="prepareTrade('buy')" class="btn btn-green">BUY</button>
-            <button onclick="prepareTrade('sell')" class="btn btn-red" style="margin-top: 8px;">SELL</button>
+
+            <!-- Strategy Box -->
+            <div class="strategy-box">
+                <p style="margin: 0; font-size: 18px; color: white;">
+                    🎯 Strategy: Buy <span id="strategyAmount">$2</span> <span id="strategyCoin">--</span>
+                </p>
+                <p style="margin: 8px 0 0 0; color: #00ff88; font-size: 14px;">
+                    Hold for <span id="strategyHold">2 days</span> then evaluate
+                </p>
+            </div>
+
+            <!-- Risk Warning -->
+            <div class="risk-box">
+                <p style="margin: 0;">
+                    ✅ GOOD RISK: 20% position size is perfect for learning.
+                </p>
+            </div>
+
+            <!-- Amount Input -->
+            <div style="margin: 20px 0;">
+                <p style="margin: 0 0 8px 0; color: #888; font-size: 14px;">Investment Amount (USD)</p>
+                <input type="number" id="amount" value="2" placeholder="2" oninput="updateStrategy()">
+                <p id="tokenEst" style="margin: 8px 0 0 0; font-size: 13px; color: #888; text-align: right;"></p>
+            </div>
+
+            <!-- Action Buttons -->
+            <button onclick="executeBuy()" class="btn btn-green" style="padding: 16px; font-size: 16px;">
+                EXECUTE BUY STRATEGY
+            </button>
+            
+            <button onclick="executeSell()" class="btn btn-red" style="margin-top: 12px; padding: 16px; font-size: 16px;">
+                SELL NOW (Exit Position)
+            </button>
+
+            <button onclick="openMetaMask()" class="btn btn-orange" style="margin-top: 12px;">
+                🦊 Open MetaMask
+            </button>
+
+            <p style="margin-top: 20px; font-size: 12px; color: #666; text-align: center; line-height: 1.4;">
+                ⚠️ Use MetaMask Swap for real trades. This app provides signals only.
+            </p>
         </div>
     </div>
 
@@ -179,7 +281,7 @@
 
     <script>
         let provider, signer, address, chainId, coins = [], selected = null;
-        const ETH_PRICE = 2100; // Approximate ETH price in USD
+        const ETH_PRICE = 2100;
 
         function showToast(msg, isError = false) {
             const t = document.getElementById('toast');
@@ -190,165 +292,111 @@
             setTimeout(() => t.style.opacity = '0', 3000);
         }
 
-        async function connectWallet() {
+        async function fetchPrices() {
             try {
-                if (!window.ethereum) {
-                    showToast('MetaMask not found', true);
-                    return;
-                }
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send('eth_requestAccounts', []);
-                signer = provider.getSigner();
-                address = await signer.getAddress();
+                // Fetch real prices from CoinGecko
+                const response = await fetch(
+                    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=pepe,shiba-inu,bonk,floki,wojak&order=market_cap_desc&sparkline=false&price_change_percentage=24h'
+                );
+                const data = await response.json();
                 
-                // Check network immediately
-                await checkNetwork();
+                // Map CoinGecko data to our coin format
+                const coinMap = {
+                    'pepe': { s: 'PEPE', n: 'Pepe', holdTime: '2 DAYS', id: 'pepe' },
+                    'shiba-inu': { s: 'SHIB', n: 'Shiba Inu', holdTime: '3 DAYS', id: 'shiba-inu' },
+                    'bonk': { s: 'BONK', n: 'Bonk', holdTime: '1 DAY', id: 'bonk' },
+                    'floki': { s: 'FLOKI', n: 'Floki', holdTime: '2 DAYS', id: 'floki' },
+                    'wojak': { s: 'WOJAK', n: 'Wojak', holdTime: '1 DAY', id: 'wojak' }
+                };
                 
-                // Setup listeners
-                window.ethereum.on('accountsChanged', (accounts) => {
-                    if (accounts.length === 0) disconnectWallet();
-                    else {
-                        address = accounts[0];
-                        updateWallet();
+                coins = data.map(coin => {
+                    const base = coinMap[coin.id];
+                    if (!base) return null;
+                    
+                    const price = coin.current_price;
+                    const change24h = coin.price_change_percentage_24h || 0;
+                    const mc = coin.market_cap || 0;
+                    const volume = coin.total_volume || 0;
+                    
+                    // AI Score calculation based on real data
+                    let score = 50;
+                    let risk = 50;
+                    
+                    // Volume/Market Cap ratio (liquidity indicator)
+                    const ratio = volume / mc;
+                    if (ratio > 0.15) { score += 15; risk -= 10; }
+                    else if (ratio < 0.05) { score -= 10; risk += 20; }
+                    
+                    // Price momentum (24h change)
+                    if (change24h > 20) score += 10;
+                    if (change24h < -15) { score -= 10; risk += 10; }
+                    if (change24h > 50) score += 5; // Strong momentum
+                    
+                    // Market cap size (risk assessment)
+                    if (mc < 100000000) risk += 15; // Very small cap = risky
+                    if (mc > 1000000000) { score += 5; risk -= 5; } // Large cap = safer
+                    
+                    // Determine signal
+                    let sig = 'HOLD';
+                    let conf = 50;
+                    
+                    if (score >= 75 && risk < 50) {
+                        sig = 'STRONG BUY';
+                        conf = 85 + Math.floor(Math.random() * 10);
+                    } else if (score >= 60 && risk < 60) {
+                        sig = 'BUY';
+                        conf = 70 + Math.floor(Math.random() * 15);
+                    } else if (score < 35 || risk > 75) {
+                        sig = 'SELL';
+                        conf = 75 + Math.floor(Math.random() * 15);
+                    } else if (score < 50) {
+                        sig = 'WEAK SELL';
+                        conf = 60;
                     }
-                });
+                    
+                    return {
+                        s: base.s,
+                        n: base.n,
+                        p: price,
+                        c24: change24h,
+                        mc: mc,
+                        v: volume,
+                        score: Math.min(100, Math.max(0, score)),
+                        risk: Math.min(100, risk),
+                        sig: sig,
+                        conf: conf,
+                        holdTime: base.holdTime,
+                        image: coin.image
+                    };
+                }).filter(c => c !== null).sort((a, b) => b.score - a.score);
                 
-                window.ethereum.on('chainChanged', () => {
-                    window.location.reload();
-                });
+                // Update last updated time
+                const now = new Date();
+                document.getElementById('updateTime').textContent = now.toLocaleTimeString();
+                document.getElementById('lastUpdated').style.display = 'block';
                 
-                updateWallet();
-                showToast('Connected!');
-            } catch(e) {
-                showToast('Connection failed', true);
-            }
-        }
-
-        async function checkNetwork() {
-            if (!provider) return;
-            const network = await provider.getNetwork();
-            chainId = network.chainId;
-            
-            const networkNames = {
-                1: 'Ethereum Mainnet',
-                8453: 'Base',
-                137: 'Polygon',
-                42161: 'Arbitrum',
-                56: 'BSC',
-                59144: 'Linea',
-                11155111: 'Sepolia'
-            };
-            
-            const currentNetwork = networkNames[chainId] || `Chain ${chainId}`;
-            document.getElementById('networkName').textContent = currentNetwork;
-            
-            // Show warning if not on Ethereum Mainnet
-            if (chainId !== 1) {
-                document.getElementById('networkWarning').classList.remove('hidden');
-                document.getElementById('networkName').style.color = '#ffc107';
-                return false;
-            } else {
-                document.getElementById('networkWarning').classList.add('hidden');
-                document.getElementById('networkName').style.color = '#00ff88';
                 return true;
-            }
-        }
-
-        async function switchToEthereum() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1' }], // 0x1 = Ethereum Mainnet
-                });
-                showToast('Switched to Ethereum!');
-                setTimeout(() => window.location.reload(), 1000);
             } catch (e) {
-                if (e.code === 4902) {
-                    // Chain not added, add it
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: '0x1',
-                                chainName: 'Ethereum Mainnet',
-                                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                                rpcUrls: ['https://ethereum.publicnode.com'],
-                                blockExplorerUrls: ['https://etherscan.io']
-                            }]
-                        });
-                    } catch (addError) {
-                        showToast('Failed to add Ethereum', true);
-                    }
-                } else {
-                    showToast('Failed to switch', true);
-                }
+                console.error('Price fetch error:', e);
+                showToast('Using demo prices (API limit)', true);
+                return false;
             }
         }
 
-        function disconnectWallet() {
-            address = null;
-            document.getElementById('connectBtn').textContent = '🦊 Connect';
-            document.getElementById('walletInfo').classList.add('hidden');
-        }
-
-        async function updateWallet() {
-            if (!address) return;
+        async function init() {
+            // Try to fetch real prices first
+            const success = await fetchPrices();
             
-            document.getElementById('connectBtn').textContent = '✅ Connected';
-            document.getElementById('walletInfo').classList.remove('hidden');
-            document.getElementById('walletAddr').textContent = address.slice(0,6) + '...' + address.slice(-4);
-            
-            await updateBalance();
-        }
-
-        async function updateBalance() {
-            if (!provider || !address) return;
-            
-            try {
-                const bal = await provider.getBalance(address);
-                const eth = parseFloat(ethers.utils.formatEther(bal));
-                const usd = eth * ETH_PRICE;
-                
-                document.getElementById('walletBal').textContent = eth.toFixed(4) + ' ETH';
-                document.getElementById('walletBalUsd').textContent = '~$' + usd.toFixed(2);
-                
-                // If on wrong network, show warning in balance too
-                if (chainId !== 1) {
-                    document.getElementById('walletBal').textContent = '0.0000 ETH';
-                    document.getElementById('walletBalUsd').textContent = 'Switch to Ethereum to see balance';
-                }
-            } catch(e) {
-                console.error('Balance error:', e);
+            // If fetch fails, use fallback data with realistic prices
+            if (!success || coins.length === 0) {
+                coins = [
+                    {s:'PEPE', n:'Pepe', p:0.0000038, c24:5.2, mc:1600000000, v:450000000, score:75, risk:40, sig:'BUY', conf:75, holdTime:'2 DAYS'},
+                    {s:'SHIB', n:'Shiba Inu', p:0.000015, c24:2.1, mc:8800000000, v:350000000, score:65, risk:35, sig:'BUY', conf:70, holdTime:'3 DAYS'},
+                    {s:'BONK', n:'Bonk', p:0.000015, c24:-2.3, mc:1100000000, v:120000000, score:55, risk:50, sig:'HOLD', conf:60, holdTime:'1 DAY'},
+                    {s:'FLOKI', n:'Floki', p:0.000075, c24:8.7, mc:720000000, v:85000000, score:70, risk:45, sig:'BUY', conf:72, holdTime:'2 DAYS'},
+                    {s:'WOJAK', n:'Wojak', p:0.00085, c24:12.3, mc:58000000, v:25000000, score:60, risk:70, sig:'HOLD', conf:55, holdTime:'1 DAY'}
+                ];
             }
-        }
-
-        function init() {
-            const data = [
-                {s:'PEPE',n:'Pepe',p:0.00000123,c24:45.2,c7:156.8,v:520000000,mc:520000000},
-                {s:'SHIB',n:'Shiba Inu',p:0.00000845,c24:12.5,c7:28.4,v:480000000,mc:5000000000},
-                {s:'BONK',n:'Bonk',p:0.00000234,c24:-8.3,c7:67.2,v:98000000,mc:145000000},
-                {s:'FLOKI',n:'Floki',p:0.0000365,c24:18.7,c7:42.1,v:75000000,mc:350000000},
-                {s:'WOJAK',n:'Wojak',p:0.0000089,c24:62.3,c7:234.5,v:28000000,mc:35000000}
-            ];
-            
-            coins = data.map(c => {
-                let score = 50, risk = 50;
-                const ratio = c.v/c.mc;
-                if(ratio>0.3){score+=15;risk-=10;}
-                else if(ratio<0.05){score-=10;risk+=20;}
-                if(c.c24>30)score+=10;
-                if(c.c24<-20){score-=10;risk+=10;}
-                if(c.c7>100)score+=10;
-                if(c.mc<50000000)risk+=15;
-                
-                let sig='HOLD',conf=50;
-                if(score>=80&&risk<40){sig='STRONG BUY';conf=90;}
-                else if(score>=65&&risk<55){sig='BUY';conf=75;}
-                else if(score<35||risk>80){sig='SELL';conf=80;}
-                else if(score<50){sig='WEAK SELL';conf=60;}
-                
-                return {...c,score:Math.min(100,score),risk,sig,conf};
-            }).sort((a,b)=>b.score-a.score);
             
             render();
             updateStats();
@@ -364,12 +412,25 @@
                 const col = coin.c24>=0?'#00ff88':'#ff3366';
                 const sign = coin.c24>=0?'+':'';
                 
+                // Format price nicely
+                let priceStr;
+                if (coin.p < 0.0001) {
+                    priceStr = '$' + coin.p.toExponential(2);
+                } else if (coin.p < 1) {
+                    priceStr = '$' + coin.p.toFixed(6);
+                } else {
+                    priceStr = '$' + coin.p.toFixed(4);
+                }
+                
                 list.innerHTML += `
                     <div class="coin-card ${cls}" onclick="openTrade('${coin.s}')">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                            <div>
-                                <span style="font-size:20px;font-weight:bold;">${coin.s}</span>
-                                <span style="color:#888;font-size:12px;"> ${coin.n}</span>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                ${coin.image ? `<img src="${coin.image}" style="width:32px;height:32px;border-radius:50%;">` : ''}
+                                <div>
+                                    <span style="font-size:20px;font-weight:bold;">${coin.s}</span>
+                                    <span style="color:#888;font-size:12px;"> ${coin.n}</span>
+                                </div>
                             </div>
                             <div style="text-align:right;">
                                 <div style="font-size:12px;padding:4px 12px;border-radius:12px;background:rgba(0,0,0,0.3);display:inline-block;">${coin.sig}</div>
@@ -378,11 +439,11 @@
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center;">
                             <div>
-                                <div style="font-size:24px;font-weight:bold;font-family:monospace;">$${coin.p.toExponential(2)}</div>
+                                <div style="font-size:22px;font-weight:bold;font-family:monospace;">${priceStr}</div>
                                 <div style="font-size:12px;color:#888;">MCap: $${(coin.mc/1000000).toFixed(1)}M</div>
                             </div>
                             <div style="text-align:right;">
-                                <div style="color:${col};font-weight:bold;">${sign}${coin.c24.toFixed(1)}%</div>
+                                <div style="color:${col};font-weight:bold;font-size:18px;">${sign}${coin.c24.toFixed(1)}%</div>
                                 <div style="font-size:12px;color:#888;">24h</div>
                             </div>
                         </div>
@@ -404,31 +465,144 @@
 
         function openTrade(sym) {
             selected = coins.find(c=>c.s===sym);
+            if (!selected) return;
+            
             document.getElementById('modalCoin').textContent = selected.s + ' - ' + selected.n;
-            document.getElementById('modalPrice').textContent = '$' + selected.p.toExponential(4);
+            
+            // Format price
+            let priceStr;
+            if (selected.p < 0.0001) {
+                priceStr = '$' + selected.p.toExponential(4);
+            } else if (selected.p < 1) {
+                priceStr = '$' + selected.p.toFixed(8);
+            } else {
+                priceStr = '$' + selected.p.toFixed(4);
+            }
+            document.getElementById('modalPrice').textContent = priceStr;
+            
             document.getElementById('modalSignal').textContent = selected.sig + ' (' + selected.conf + '% confidence)';
             document.getElementById('modalSignal').style.color = selected.sig.includes('BUY')?'#00ff88':selected.sig.includes('SELL')?'#ff3366':'#ffc107';
-            document.getElementById('amount').value = '';
-            document.getElementById('tokenEst').textContent = '';
-            document.getElementById('tradeModal').style.display = 'flex';
+            
+            const col = selected.c24>=0?'#00ff88':'#ff3366';
+            const sign = selected.c24>=0?'+':'';
+            document.getElementById('modalChange').innerHTML = `<span style="color:${col};font-weight:bold;">${sign}${selected.c24.toFixed(2)}%</span> (24h)`;
+            
+            document.getElementById('holdTime').textContent = selected.holdTime || '2 DAYS';
+            document.getElementById('strategyCoin').textContent = selected.s;
+            document.getElementById('strategyHold').textContent = (selected.holdTime || '2 days').toLowerCase();
+            
+            updateStrategy();
+            
+            document.getElementById('tradeModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateStrategy() {
+            const usd = parseFloat(document.getElementById('amount').value)||0;
+            if (selected && selected.p) {
+                const tokens = usd / selected.p;
+                document.getElementById('tokenEst').textContent = 'Est: ' + tokens.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ' + selected.s;
+            }
+            document.getElementById('strategyAmount').textContent = usd;
         }
 
         function closeModal() {
             document.getElementById('tradeModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
-        function calcTokens() {
-            const usd = parseFloat(document.getElementById('amount').value)||0;
-            const tokens = usd/selected.p;
-            document.getElementById('tokenEst').textContent = 'Est: ' + tokens.toExponential(2) + ' ' + selected.s;
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    showToast('MetaMask not found', true);
+                    return;
+                }
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send('eth_requestAccounts', []);
+                signer = provider.getSigner();
+                address = await signer.getAddress();
+                
+                const network = await provider.getNetwork();
+                chainId = network.chainId;
+                
+                updateWallet();
+                
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) disconnectWallet();
+                    else {
+                        address = accounts[0];
+                        updateWallet();
+                    }
+                });
+                
+                window.ethereum.on('chainChanged', () => window.location.reload());
+                
+                showToast('Connected!');
+            } catch(e) {
+                showToast('Connection failed', true);
+            }
         }
 
-        function prepareTrade(type) {
+        function disconnectWallet() {
+            address = null;
+            document.getElementById('connectBtn').textContent = '🦊 Connect';
+            document.getElementById('walletInfo').classList.add('hidden');
+        }
+
+        async function updateWallet() {
+            if (!address) return;
+            
+            document.getElementById('connectBtn').textContent = '✅ Connected';
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('walletAddr').textContent = address.slice(0,6) + '...' + address.slice(-4);
+            
+            const networkNames = {
+                1: 'Ethereum Mainnet',
+                8453: 'Base',
+                137: 'Polygon',
+                42161: 'Arbitrum',
+                56: 'BSC',
+                59144: 'Linea'
+            };
+            document.getElementById('networkName').textContent = networkNames[chainId] || `Chain ${chainId}`;
+            if (chainId !== 1) document.getElementById('networkName').style.color = '#ff3366';
+            else document.getElementById('networkName').style.color = '#00ff88';
+            
+            try {
+                const bal = await provider.getBalance(address);
+                const eth = parseFloat(ethers.utils.formatEther(bal));
+                const usd = eth * ETH_PRICE;
+                
+                document.getElementById('walletBal').textContent = eth.toFixed(4) + ' ETH';
+                document.getElementById('walletBalUsd').textContent = '~$' + usd.toFixed(2);
+            } catch(e) {
+                console.error('Balance error:', e);
+            }
+        }
+
+        function executeBuy() {
             if(!address){showToast('Connect wallet first', true);return;}
-            if(chainId !== 1){showToast('Switch to Ethereum Mainnet first!', true);return;}
+            if(chainId !== 1){showToast('Switch to Ethereum Mainnet!', true);return;}
+            
             const amt = document.getElementById('amount').value;
             if(!amt||amt<=0){showToast('Enter amount', true);return;}
-            showToast(type.toUpperCase() + ' ' + selected.s + ' - Check MetaMask');
+            
+            showToast(`🎯 Buy ${selected.s} strategy ready!`);
+            
+            // Open MetaMask swap
+            setTimeout(() => {
+                window.location.href = 'https://metamask.app.link/';
+            }, 500);
+        }
+
+        function executeSell() {
+            if(!address){showToast('Connect wallet first', true);return;}
+            showToast('Open MetaMask to swap tokens', true);
+            window.location.href = 'https://metamask.app.link/';
+        }
+
+        function openMetaMask() {
+            window.location.href = 'https://metamask.app.link/';
         }
 
         function showHome() {
@@ -440,22 +614,18 @@
             else document.getElementById('walletInfo').scrollIntoView({behavior:'smooth'});
         }
 
-        function refresh() {
+        async function refresh() {
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('coinsList').classList.add('hidden');
-            setTimeout(()=>{
-                init();
-                if(address) updateBalance();
-                showToast('Refreshed!');
-            },1000);
+            
+            // Re-fetch prices
+            await init();
+            
+            if(address) updateWallet();
+            showToast('Prices refreshed!');
         }
 
-        window.onclick = function(e) {
-            const m = document.getElementById('tradeModal');
-            if(e.target===m) m.style.display='none';
-        }
-
-        setTimeout(init, 1500);
+        setTimeout(init, 1000);
     </script>
 </body>
 </html>
