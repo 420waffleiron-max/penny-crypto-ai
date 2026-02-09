@@ -39,7 +39,7 @@
             z-index: 100;
             backdrop-filter: blur(10px);
         }
-        .nav-btn { background: none; border: none; color: #666; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: color 0.2s; }
+        .nav-btn { background: none; border: none; color: #666; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: color 0.2s; flex: 1; }
         .nav-btn.active { color: #00ff88; }
         .hidden { display: none !important; }
 
@@ -107,6 +107,153 @@
             font-weight: 600;
             text-transform: uppercase;
         }
+
+        /* AI Advisor Styles */
+        .chat-container {
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding-bottom: 100px;
+        }
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            font-weight: 500;
+        }
+        .ai-message {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .ai-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #0088ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .chat-input-container {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            padding: 12px 16px;
+            background: rgba(10,10,15,0.98);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            z-index: 90;
+        }
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-input:focus {
+            border-color: #00ff88;
+        }
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #00ff88;
+            border: none;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+        .quick-questions {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0;
+            margin-bottom: 8px;
+            scrollbar-width: none;
+        }
+        .quick-questions::-webkit-scrollbar {
+            display: none;
+        }
+        .quick-q {
+            background: rgba(0,255,136,0.15);
+            border: 1px solid rgba(0,255,136,0.3);
+            color: #00ff88;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-q:hover {
+            background: rgba(0,255,136,0.25);
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        .trend-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .trend-up { background: rgba(0,255,136,0.2); color: #00ff88; }
+        .trend-down { background: rgba(255,51,102,0.2); color: #ff3366; }
+        .trend-sideways { background: rgba(255,193,7,0.2); color: #ffc107; }
     </style>
 </head>
 <body>
@@ -124,7 +271,7 @@
         </div>
 
         <!-- Portfolio Summary -->
-        <div class="glass mb-6">
+        <div class="glass mb-6" id="portfolio-summary">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <p class="text-[10px] uppercase tracking-wider text-[#00ff88] font-bold mb-1">Portfolio Value</p>
@@ -157,6 +304,7 @@
             <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-signals" onclick="showView('signals')" style="background: rgba(0,255,136,0.2); color: #00ff88;">Signals</button>
             <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-portfolio" onclick="showView('portfolio')" style="background: rgba(255,255,255,0.1); color: white;">Portfolio</button>
             <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-discover" onclick="showView('discover')" style="background: rgba(255,255,255,0.1); color: white;">Discover</button>
+            <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-advisor" onclick="showView('advisor')" style="background: rgba(255,255,255,0.1); color: white;">Advisor</button>
         </div>
 
         <!-- Loading -->
@@ -180,6 +328,51 @@
             <p class="text-xs text-gray-500 mb-3">Trending tokens with AI buy/sell signals based on momentum, volume, and market data.</p>
             <div id="discover-list" class="space-y-3"></div>
         </div>
+
+        <!-- AI Advisor View -->
+        <div id="advisor-view" class="hidden">
+            <div class="glass mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="ai-avatar">📊</div>
+                    <div>
+                        <h3 class="font-bold text-lg">AI Chart Analyst</h3>
+                        <p class="text-xs text-gray-500">Technical analysis: trends, support/resistance, momentum</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-questions" id="quick-questions">
+                <button class="quick-q" onclick="askQuick('Technical analysis of PEPE')">📈 PEPE Chart</button>
+                <button class="quick-q" onclick="askQuick('Is the trend bullish or bearish?')">Trend Check</button>
+                <button class="quick-q" onclick="askQuick('Support and resistance levels')">Key Levels</button>
+                <button class="quick-q" onclick="askQuick('Should I buy the dip?')">Buy the dip?</button>
+            </div>
+
+            <div class="chat-container" id="chat-container">
+                <div class="message ai-message">
+                    <strong>Chart Analysis Ready 📊</strong><br><br>
+                    I now analyze actual price charts instead of just 24h changes. I look at:<br>
+                    • <strong>Trend Direction</strong> (Higher highs vs lower lows)<br>
+                    • <strong>Moving Averages</strong> (7d vs 30d trends)<br>
+                    • <strong>Momentum</strong> (RSI overbought/oversold)<br>
+                    • <strong>Volatility</strong> (Price swings and patterns)<br><br>
+                    Ask me about any coin's chart or technical outlook!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Input (Only for Advisor view) -->
+    <div class="chat-input-container hidden" id="chat-input-container">
+        <div class="chat-input-wrapper">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask about chart analysis..." onkeypress="handleChatKey(event)">
+            <button class="send-btn" onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <!-- Bottom Navigation -->
@@ -199,6 +392,10 @@
         <button class="nav-btn" id="nav-discover" onclick="showView('discover')">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             Discover
+        </button>
+        <button class="nav-btn" id="nav-advisor" onclick="showView('advisor')">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            Advisor
         </button>
     </nav>
 
@@ -240,6 +437,7 @@
         let portfolio = [];
         let discoverData = [];
         let totalValue = 0;
+        let chartDataCache = {}; // Cache for chart data
 
         // ========== INIT ==========
         async function init() {
@@ -278,6 +476,188 @@
                 console.error(`Token balance error:`, e);
                 return 0;
             }
+        }
+
+        // ========== CHART DATA & TECHNICAL ANALYSIS ==========
+        async function fetchChartData(coinId, days = 30) {
+            try {
+                const resp = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
+                if (!resp.ok) throw new Error('Chart data error');
+                const data = await resp.json();
+                return data.prices.map(p => ({ timestamp: p[0], price: p[1] }));
+            } catch(e) {
+                console.error('Chart fetch error:', e);
+                return null;
+            }
+        }
+
+        function calculateEMA(prices, period) {
+            const k = 2 / (period + 1);
+            let ema = [prices[0]];
+            for (let i = 1; i < prices.length; i++) {
+                ema.push(prices[i] * k + ema[i-1] * (1-k));
+            }
+            return ema;
+        }
+
+        function calculateRSI(prices, period = 14) {
+            if (prices.length < period + 1) return 50;
+            
+            let gains = 0, losses = 0;
+            for (let i = 1; i <= period; i++) {
+                const change = prices[prices.length - i] - prices[prices.length - i - 1];
+                if (change > 0) gains += change;
+                else losses -= change;
+            }
+            
+            if (losses === 0) return 100;
+            const rs = gains / losses;
+            return 100 - (100 / (1 + rs));
+        }
+
+        function analyzeTrend(prices) {
+            if (prices.length < 7) return { direction: 'neutral', strength: 0 };
+            
+            const shortTerm = prices.slice(-7);
+            const longTerm = prices.slice(-30);
+            
+            const shortAvg = shortTerm.reduce((a,b) => a+b,0) / shortTerm.length;
+            const longAvg = longTerm.reduce((a,b) => a+b,0) / longTerm.length;
+            
+            // Calculate highs and lows for trend structure
+            const recent = prices.slice(-14);
+            const highs = [];
+            const lows = [];
+            for (let i = 1; i < recent.length - 1; i++) {
+                if (recent[i] > recent[i-1] && recent[i] > recent[i+1]) highs.push(recent[i]);
+                if (recent[i] < recent[i-1] && recent[i] < recent[i+1]) lows.push(recent[i]);
+            }
+            
+            // Determine trend
+            let trend = 'sideways';
+            let strength = 0;
+            
+            if (shortAvg > longAvg * 1.05) {
+                trend = 'uptrend';
+                strength = Math.min(100, ((shortAvg / longAvg) - 1) * 1000);
+            } else if (shortAvg < longAvg * 0.95) {
+                trend = 'downtrend';
+                strength = Math.min(100, (1 - (shortAvg / longAvg)) * 1000);
+            }
+            
+            // Check higher highs/lows or lower highs/lows
+            if (highs.length >= 2 && lows.length >= 2) {
+                const hh = highs[highs.length-1] > highs[highs.length-2];
+                const hl = lows[lows.length-1] > lows[lows.length-2];
+                const lh = highs[highs.length-1] < highs[highs.length-2];
+                const ll = lows[lows.length-1] < lows[lows.length-2];
+                
+                if (hh && hl) {
+                    trend = 'strong_uptrend';
+                    strength = Math.max(strength, 70);
+                } else if (lh && ll) {
+                    trend = 'strong_downtrend';
+                    strength = Math.max(strength, 70);
+                }
+            }
+            
+            return { direction: trend, strength, shortAvg, longAvg };
+        }
+
+        function findSupportResistance(prices) {
+            if (prices.length < 10) return { support: 0, resistance: 0 };
+            
+            const sorted = [...prices].sort((a,b) => a-b);
+            const lowQuartile = sorted[Math.floor(sorted.length * 0.25)];
+            const highQuartile = sorted[Math.floor(sorted.length * 0.75)];
+            
+            // Find most touched levels (simplified)
+            const current = prices[prices.length - 1];
+            const range = highQuartile - lowQuartile;
+            
+            return {
+                support: lowQuartile,
+                resistance: highQuartile,
+                middle: (lowQuartile + highQuartile) / 2,
+                range: range
+            };
+        }
+
+        function calculateVolatility(prices) {
+            if (prices.length < 2) return 0;
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+            }
+            const avg = returns.reduce((a,b) => a+b,0) / returns.length;
+            const variance = returns.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / returns.length;
+            return Math.sqrt(variance) * 100; // Standard deviation as percentage
+        }
+
+        async function getTechnicalAnalysis(coinId) {
+            // Check cache first
+            if (chartDataCache[coinId] && Date.now() - chartDataCache[coinId].timestamp < 300000) {
+                return chartDataCache[coinId].analysis;
+            }
+            
+            const data = await fetchChartData(coinId, 30);
+            if (!data || data.length < 14) return null;
+            
+            const prices = data.map(d => d.price);
+            const currentPrice = prices[prices.length - 1];
+            
+            const trend = analyzeTrend(prices);
+            const rsi = calculateRSI(prices);
+            const levels = findSupportResistance(prices);
+            const volatility = calculateVolatility(prices);
+            
+            // Calculate momentum (rate of change)
+            const momentum7d = ((currentPrice - prices[prices.length-8]) / prices[prices.length-8]) * 100;
+            const momentum1d = ((currentPrice - prices[prices.length-2]) / prices[prices.length-2]) * 100;
+            
+            // Determine signal based on technicals
+            let signal = 'HOLD';
+            let confidence = 50;
+            
+            if (trend.direction.includes('uptrend') && rsi < 70 && momentum7d > 0) {
+                signal = trend.direction === 'strong_uptrend' ? 'STRONG BUY' : 'BUY';
+                confidence = 60 + (trend.strength / 3);
+            } else if (trend.direction.includes('downtrend') && rsi > 30 && momentum7d < 0) {
+                signal = trend.direction === 'strong_downtrend' ? 'STRONG SELL' : 'SELL';
+                confidence = 60 + (trend.strength / 3);
+            }
+            
+            // Adjust for extreme RSI
+            if (rsi > 80) {
+                signal = 'SELL'; // Overbought
+                confidence = Math.max(confidence, 75);
+            } else if (rsi < 20) {
+                signal = 'BUY'; // Oversold
+                confidence = Math.max(confidence, 75);
+            }
+            
+            const analysis = {
+                trend: trend.direction,
+                trendStrength: trend.strength,
+                rsi: rsi,
+                support: levels.support,
+                resistance: levels.resistance,
+                volatility: volatility,
+                momentum7d: momentum7d,
+                momentum1d: momentum1d,
+                signal: signal,
+                confidence: Math.min(95, Math.round(confidence)),
+                currentPrice: currentPrice,
+                distanceToSupport: ((currentPrice - levels.support) / levels.support) * 100,
+                distanceToResistance: ((levels.resistance - currentPrice) / currentPrice) * 100
+            };
+            
+            chartDataCache[coinId] = {
+                timestamp: Date.now(),
+                analysis: analysis
+            };
+            
+            return analysis;
         }
 
         // ========== LOAD PORTFOLIO ==========
@@ -355,7 +735,8 @@
 
                 if (document.getElementById('signals-view').classList.contains('hidden') &&
                     document.getElementById('portfolio-view').classList.contains('hidden') &&
-                    document.getElementById('discover-view').classList.contains('hidden')) {
+                    document.getElementById('discover-view').classList.contains('hidden') &&
+                    document.getElementById('advisor-view').classList.contains('hidden')) {
                     showView('signals');
                 }
 
@@ -404,7 +785,7 @@
             }
         }
 
-        // ========== AI SIGNAL LOGIC ==========
+        // ========== AI SIGNAL LOGIC (24h based) ==========
         function getSignal(token) {
             const change = token.change24h || 0;
             let score = 50;
@@ -626,7 +1007,7 @@
 
         // ========== VIEW SWITCHING ==========
         function showView(view) {
-            ['signals', 'portfolio', 'discover'].forEach(v => {
+            ['signals', 'portfolio', 'discover', 'advisor'].forEach(v => {
                 document.getElementById(v + '-view').classList.add('hidden');
                 document.getElementById('tab-' + v).style.background = 'rgba(255,255,255,0.1)';
                 document.getElementById('tab-' + v).style.color = 'white';
@@ -636,6 +1017,232 @@
             document.getElementById('tab-' + view).style.background = 'rgba(0,255,136,0.2)';
             document.getElementById('tab-' + view).style.color = '#00ff88';
             document.getElementById('nav-' + view).classList.add('active');
+            
+            // Show/hide chat input
+            if (view === 'advisor') {
+                document.getElementById('chat-input-container').classList.remove('hidden');
+                document.getElementById('portfolio-summary').classList.add('hidden');
+            } else {
+                document.getElementById('chat-input-container').classList.add('hidden');
+                document.getElementById('portfolio-summary').classList.remove('hidden');
+            }
+        }
+
+        // ========== AI ADVISOR LOGIC WITH CHART ANALYSIS ==========
+        function askQuick(question) {
+            document.getElementById('chat-input').value = question;
+            sendMessage();
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showTyping();
+
+            // Check if question requires chart analysis
+            const requiresChart = message.toLowerCase().includes('chart') || 
+                                  message.toLowerCase().includes('technical') ||
+                                  message.toLowerCase().includes('trend') ||
+                                  message.toLowerCase().includes('support') ||
+                                  message.toLowerCase().includes('resistance') ||
+                                  message.toLowerCase().includes('analysis') ||
+                                  message.toLowerCase().includes('rsi') ||
+                                  message.toLowerCase().includes('moving') ||
+                                  message.toLowerCase().includes('dip');
+
+            if (requiresChart) {
+                // Extract coin ID from message
+                const coinId = extractCoinId(message);
+                if (coinId) {
+                    const analysis = await getTechnicalAnalysis(coinId);
+                    hideTyping();
+                    if (analysis) {
+                        addMessage(formatTechnicalAnalysis(coinId, analysis), 'ai');
+                    } else {
+                        addMessage("Sorry, I couldn't fetch chart data for that coin right now. Try again in a moment.", 'ai');
+                    }
+                } else {
+                    hideTyping();
+                    addMessage("Which coin would you like me to analyze? Try asking 'Technical analysis of PEPE' or 'Chart for ETH'.", 'ai');
+                }
+            } else {
+                // Regular portfolio advice (existing logic enhanced with chart data if available)
+                setTimeout(async () => {
+                    hideTyping();
+                    const response = await generateEnhancedResponse(message);
+                    addMessage(response, 'ai');
+                }, 1000);
+            }
+        }
+
+        function extractCoinId(message) {
+            const text = message.toLowerCase();
+            
+            // Check portfolio first
+            for (let token of portfolio) {
+                if (text.includes(token.symbol.toLowerCase()) || text.includes(token.name.toLowerCase())) {
+                    return token.cgId;
+                }
+            }
+            
+            // Check discover tokens
+            for (let token of DISCOVER_TOKENS) {
+                if (text.includes(token.symbol.toLowerCase()) || text.includes(token.name.toLowerCase())) {
+                    return token.cgId;
+                }
+            }
+            
+            return null;
+        }
+
+        function formatTechnicalAnalysis(coinId, ta) {
+            const coin = [...portfolio, ...discoverData].find(c => c.cgId === coinId);
+            const symbol = coin ? coin.symbol : coinId.toUpperCase();
+            
+            let trendEmoji = '➡️';
+            let trendText = 'Sideways';
+            if (ta.trend.includes('strong_uptrend')) { trendEmoji = '🚀'; trendText = 'Strong Uptrend'; }
+            else if (ta.trend.includes('uptrend')) { trendEmoji = '📈'; trendText = 'Uptrend'; }
+            else if (ta.trend.includes('strong_downtrend')) { trendEmoji = '🔴'; trendText = 'Strong Downtrend'; }
+            else if (ta.trend.includes('downtrend')) { trendEmoji = '📉'; trendText = 'Downtrend'; }
+            
+            const rsiStatus = ta.rsi > 70 ? 'Overbought 🔴' : ta.rsi < 30 ? 'Oversold 🟢' : 'Neutral ⚪';
+            
+            let response = `<strong>${symbol} Technical Analysis</strong> ${trendEmoji}<br><br>`;
+            response += `<strong>Trend:</strong> ${trendText} (${ta.trendStrength.toFixed(0)}% strength)<br>`;
+            response += `<strong>RSI (14):</strong> ${ta.rsi.toFixed(1)} - ${rsiStatus}<br>`;
+            response += `<strong>Volatility:</strong> ${ta.volatility.toFixed(2)}%<br><br>`;
+            
+            response += `<strong>Key Levels:</strong><br>`;
+            response += `🟢 Support: $${ta.support.toFixed(6)}<br>`;
+            response += `🔴 Resistance: $${ta.resistance.toFixed(6)}<br>`;
+            response += `📍 Current: $${ta.currentPrice.toFixed(6)}<br><br>`;
+            
+            if (ta.distanceToSupport < 5) {
+                response += `⚠️ <strong>Near Support:</strong> Only ${ta.distanceToSupport.toFixed(1)}% above support. Good risk/reward for entry.<br>`;
+            } else if (ta.distanceToResistance < 5) {
+                response += `⚠️ <strong>Near Resistance:</strong> Only ${ta.distanceToResistance.toFixed(1)}% below resistance. Watch for breakout or rejection.<br>`;
+            }
+            
+            response += `<br><strong>Momentum:</strong><br>`;
+            response += `7-Day: ${ta.momentum7d >= 0 ? '+' : ''}${ta.momentum7d.toFixed(2)}%<br>`;
+            response += `24h: ${ta.momentum1d >= 0 ? '+' : ''}${ta.momentum1d.toFixed(2)}%<br><br>`;
+            
+            response += `<strong>Signal:</strong> <span style="color: ${ta.signal.includes('BUY') ? '#00ff88' : ta.signal.includes('SELL') ? '#ff3366' : '#ffc107'}">${ta.signal}</span> (${ta.confidence}% confidence)<br><br>`;
+            
+            if (ta.signal.includes('BUY')) {
+                response += "💡 <em>Chart shows bullish structure. Consider DCA if entering.</em>";
+            } else if (ta.signal.includes('SELL')) {
+                response += "⚠️ <em>Weak technical structure. Consider reducing exposure.</em>";
+            } else {
+                response += "➡️ <em>No clear directional bias. Wait for breakout.</em>";
+            }
+            
+            return response;
+        }
+
+        async function generateEnhancedResponse(input) {
+            const text = input.toLowerCase();
+            
+            // Check if asking about specific coin with chart fallback
+            const coinId = extractCoinId(input);
+            if (coinId && (text.includes('should i') || text.includes('buy') || text.includes('sell'))) {
+                const ta = await getTechnicalAnalysis(coinId);
+                if (ta) return formatTechnicalAnalysis(coinId, ta);
+            }
+            
+            // Portfolio analysis with technical context
+            if (text.includes('portfolio') || text.includes('analyze')) {
+                if (portfolio.length === 0) return "Your portfolio is empty. Add some tokens first!";
+                
+                let response = "<strong>Portfolio Technical Overview</strong><br><br>";
+                
+                // Get technical analysis for top holdings
+                const topHoldings = portfolio.slice(0, 3);
+                let bullishCount = 0;
+                let bearishCount = 0;
+                
+                for (let token of topHoldings) {
+                    const ta = await getTechnicalAnalysis(token.cgId);
+                    if (ta) {
+                        const emoji = ta.trend.includes('uptrend') ? '🟢' : ta.trend.includes('downtrend') ? '🔴' : '⚪';
+                        response += `${emoji} <strong>${token.symbol}:</strong> ${ta.trend.replace(/_/g, ' ')} (RSI: ${ta.rsi.toFixed(0)})<br>`;
+                        if (ta.trend.includes('uptrend')) bullishCount++;
+                        if (ta.trend.includes('downtrend')) bearishCount++;
+                    }
+                }
+                
+                response += `<br><strong>Overall Bias:</strong> `;
+                if (bullishCount > bearishCount) response += "Bullish 📈 - Most charts show upward momentum";
+                else if (bearishCount > bullishCount) response += "Bearish 📉 - Multiple breakdowns detected";
+                else response += "Mixed ⚖️ - No clear market direction";
+                
+                return response;
+            }
+            
+            // Trend check
+            if (text.includes('trend') || text.includes('bullish') || text.includes('bearish')) {
+                if (portfolio.length === 0) return "Add tokens to your portfolio to see trend analysis.";
+                
+                let results = [];
+                for (let token of portfolio.slice(0, 3)) {
+                    const ta = await getTechnicalAnalysis(token.cgId);
+                    if (ta) results.push({ symbol: token.symbol, trend: ta.trend, strength: ta.trendStrength });
+                }
+                
+                const uptrends = results.filter(r => r.trend.includes('uptrend'));
+                const downtrends = results.filter(r => r.trend.includes('downtrend'));
+                
+                let response = "<strong>Market Trend Analysis</strong><br><br>";
+                if (uptrends.length > downtrends.length) {
+                    response += `🟢 <strong>Bullish bias detected.</strong> ${uptrends.length}/${results.length} of your holdings are in uptrends.<br><br>`;
+                    response += `Strongest: ${uptrends.sort((a,b) => b.strength - a.strength)[0]?.symbol}`;
+                } else if (downtrends.length > uptrends.length) {
+                    response += `🔴 <strong>Bearish caution.</strong> ${downtrends.length}/${results.length} of your holdings are downtrending.<br><br>`;
+                    response += `Weakest: ${downtrends.sort((a,b) => b.strength - a.strength)[0]?.symbol}`;
+                } else {
+                    response += "⚪ <strong>Mixed signals.</strong> No clear trend direction across your portfolio.";
+                }
+                return response;
+            }
+            
+            // Default response
+            return "I can analyze charts for you! Try asking:<br>• 'Technical analysis of PEPE'<br>• 'Is the trend bullish?'<br>• 'Support and resistance for ETH'<br>• 'Should I buy the dip?'";
+        }
+
+        function addMessage(text, sender) {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = `message ${sender}-message`;
+            div.innerHTML = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTyping() {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = 'message ai-message typing-indicator';
+            div.id = 'typing-indicator';
+            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing-indicator');
+            if (el) el.remove();
         }
 
         // ========== REFRESH ==========
