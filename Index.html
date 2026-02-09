@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Trader Pro - Real Portfolio Analyzer</title>
+    <title>AI Trader Pro - Real Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
@@ -34,15 +34,12 @@
             width: 100%;
             font-size: 15px;
         }
-        .btn:active { opacity: 0.8; }
         .btn-green { background: linear-gradient(135deg, #00c853 0%, #00e676 100%); color: #000; }
         .btn-red { background: linear-gradient(135deg, #ff1744 0%, #f50057 100%); }
-        .btn-blue { background: linear-gradient(135deg, #2962ff 0%, #2979ff 100%); }
         
         .signal-strong-buy { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.15); }
         .signal-buy { border-left: 4px solid #00cc66; background: rgba(0,204,102,0.1); }
         .signal-hold { border-left: 4px solid #ffc107; background: rgba(255,193,7,0.1); }
-        .signal-sell { border-left: 4px solid #ff3366; background: rgba(255,51,102,0.1); }
         
         .bottom-nav {
             position: fixed;
@@ -59,33 +56,6 @@
         
         .hidden { display: none !important; }
         
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
-            color: white;
-            font-size: 16px;
-        }
-        
-        .hold-time {
-            background: linear-gradient(135deg, rgba(0,200,255,0.2) 0%, rgba(0,255,136,0.1) 100%);
-            border: 1px solid rgba(0,200,255,0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 12px;
-            text-align: center;
-        }
-        
-        .position-card {
-            background: rgba(0,255,136,0.05);
-            border: 1px solid rgba(0,255,136,0.2);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-        
         #toast {
             position: fixed;
             top: 60px;
@@ -100,29 +70,6 @@
             pointer-events: none;
             z-index: 1000;
             font-weight: 600;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
-            display: none;
-            overflow-y: auto;
-            z-index: 1000;
-            padding: 20px;
-        }
-        
-        .risk-meter {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .risk-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s;
         }
     </style>
 </head>
@@ -140,31 +87,25 @@
             </button>
         </div>
 
-        <!-- My Portfolio Summary (Real Data) -->
+        <!-- Portfolio Summary -->
         <div id="myPortfolio" class="glass hidden" style="background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(102,126,234,0.1) 100%); border: 1px solid rgba(0,255,136,0.2);">
             <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <p style="margin: 0; color: #00ff88; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">💼 Your Real Portfolio</p>
-                    <h2 id="realPortValue" style="margin: 8px 0 0 0; font-size: 32px; color: white;">$0.00</h2>
-                    <p id="realPortChange" style="margin: 4px 0 0 0; font-size: 14px; color: #888;">Loading...</p>
-                </div>
-                <div style="text-align: right;">
-                    <p style="margin: 0; font-size: 11px; color: #666;">ETH Balance</p>
-                    <p id="ethBalance" style="margin: 4px 0 0 0; font-size: 18px; color: white;">--</p>
+                    <p style="margin: 0; color: #00ff88; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">💼 Your Portfolio</p>
+                    <h2 id="portValue" style="margin: 8px 0 0 0; font-size: 32px; color: white;">$0.00</h2>
+                    <p id="ethBal" style="margin: 4px 0 0 0; font-size: 14px; color: #888;">-- ETH</p>
                 </div>
             </div>
-            
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <p style="margin: 0 0 8px 0; color: #888; font-size: 12px;">🎯 AI Recommendation:</p>
-                <p id="portfolioAdvice" style="margin: 0; font-size: 14px; color: #00ff88; font-weight: 600;">Connect wallet to analyze your holdings</p>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p id="aiAdvice" style="margin: 0; font-size: 13px; color: #00ff88;">Analyzing...</p>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;">
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
             <button onclick="showTab('market')" id="tab-market" class="btn" style="flex: 1; background: rgba(0,255,136,0.2); color: #00ff88;">📊 Market</button>
             <button onclick="showTab('myassets')" id="tab-myassets" class="btn" style="flex: 1; background: rgba(255,255,255,0.1);">💼 My Assets</button>
-            <button onclick="showTab('opportunities')" id="tab-opportunities" class="btn" style="flex: 1; background: rgba(255,255,255,0.1);">🎯 Opportunities</button>
+            <button onclick="showTab('trades')" id="tab-trades" class="btn" style="flex: 1; background: rgba(255,255,255,0.1);">🎯 Trades</button>
         </div>
 
         <!-- Market View -->
@@ -179,31 +120,15 @@
         <!-- My Assets View -->
         <div id="view-myassets" class="hidden">
             <div id="noWallet" class="glass" style="text-align: center; padding: 40px;">
-                <p style="color: #666;">Connect your wallet to see your real holdings</p>
-                <button onclick="connectWallet()" class="btn btn-green" style="margin-top: 16px;">Connect MetaMask</button>
+                <p style="color: #666;">Connect MetaMask to see your real holdings</p>
+                <button onclick="connectWallet()" class="btn btn-green" style="margin-top: 16px;">Connect Wallet</button>
             </div>
             <div id="assetsList"></div>
         </div>
 
-        <!-- Opportunities View -->
-        <div id="view-opportunities" class="hidden">
-            <div class="glass" style="margin-bottom: 16px;">
-                <h3 style="margin: 0 0 12px 0; font-size: 16px;">🚀 Top Opportunities Now</h3>
-                <p style="margin: 0; color: #888; font-size: 13px;">Based on current market conditions and your risk profile</p>
-            </div>
-            <div id="opportunitiesList"></div>
-        </div>
-    </div>
-
-    <!-- Analysis Modal -->
-    <div id="analysisModal" class="modal">
-        <div style="max-width: 500px; margin: 0 auto; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 20px;">
-                <h2 style="margin: 0;">Trading Analysis</h2>
-                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 28px;">&times;</button>
-            </div>
-
-            <div id="analysisContent"></div>
+        <!-- Trades View -->
+        <div id="view-trades" class="hidden">
+            <div id="tradesList"></div>
         </div>
     </div>
 
@@ -211,82 +136,57 @@
         <button class="nav-btn active" onclick="showTab('market')">📊<span>Market</span></button>
         <button class="nav-btn" onclick="showTab('myassets')">💼<span>My Assets</span></button>
         <button class="nav-btn" onclick="refresh()">🔄<span>Refresh</span></button>
-        <button class="nav-btn" onclick="showTab('opportunities')">🎯<span>Trades</span></button>
+        <button class="nav-btn" onclick="showTab('trades')">🎯<span>Trades</span></button>
     </div>
 
     <div id="toast"></div>
 
     <script>
-        // State
         let provider, signer, address;
         let marketData = [];
-        let userHoldings = [];
-        let ethPrice = 2100; // Default ETH price
+        let ethPrice = 2100;
 
-        // Token addresses for common coins (Ethereum mainnet)
-        const tokenContracts = {
-            'PEPE': '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
-            'SHIB': '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-            'BONK': '0x1151CB3d861920e07Bc38f01680Ae3CbEd822c23', // Note: BONK is Solana, won't show on ETH
-            'FLOKI': '0xcf0C122c6b73ff809C693DB761e7BaEBe62b6a2E',
-            'WOJAK': '0x5026F006b85729A8b14553FAE6AF249aD16C9aaB'
+        // Initialize immediately
+        window.onload = function() {
+            loadData();
         };
 
-        const tokenABI = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function decimals() view returns (uint8)",
-            "function symbol() view returns (string)"
-        ];
-
-        async function fetchMarketData() {
+        async function loadData() {
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=pepe,shiba-inu,bonk,floki,wojak,ethereum&order=market_cap_desc&sparkline=false&price_change_percentage=1h,24h,7d');
+                // Try to fetch real data
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=pepe,shiba-inu,bonk,floki,wojak,ethereum&order=market_cap_desc&sparkline=false&price_change_percentage=24h');
                 const data = await response.json();
                 
                 marketData = data.map(coin => {
-                    const c1h = coin.price_change_percentage_1h_in_currency || 0;
                     const c24 = coin.price_change_percentage_24h || 0;
-                    const c7d = coin.price_change_percentage_7d_in_currency || 0;
                     const mc = coin.market_cap || 0;
                     const vol = coin.total_volume || 0;
                     
-                    // Real AI scoring
+                    // Real scoring
                     let score = 50;
+                    score += Math.max(-20, Math.min(20, c24)); // Price momentum
                     
-                    // Momentum factor (40%)
-                    const momentum = (c1h * 0.3) + (c24 * 0.5) + (c7d * 0.2);
-                    score += Math.max(-20, Math.min(20, momentum));
-                    
-                    // Volume/liquidity (30%)
                     const vmc = vol / mc;
                     if (vmc > 0.15) score += 15;
                     else if (vmc < 0.05) score -= 10;
                     
-                    // Market cap stability (30%)
-                    if (coin.id === 'ethereum') score += 10; // ETH is safer
-                    else if (mc > 1000000000) score += 5;
-                    else if (mc < 100000000) score -= 5;
+                    if (mc > 1000000000) score += 5;
                     
                     score = Math.max(0, Math.min(100, score));
                     
-                    // Determine signal and hold time
-                    let signal, holdTime, action;
+                    let signal, holdTime;
                     if (score >= 75) {
                         signal = 'STRONG BUY';
-                        holdTime = '2-3 days (fast momentum)';
-                        action = 'Buy immediately - high conviction';
+                        holdTime = '2-3 days';
                     } else if (score >= 60) {
                         signal = 'BUY';
                         holdTime = '3-5 days';
-                        action = 'Good entry point';
                     } else if (score >= 40) {
                         signal = 'HOLD';
-                        holdTime = 'Hold current position';
-                        action = 'Wait for better entry';
+                        holdTime = 'Hold position';
                     } else {
                         signal = 'SELL';
-                        holdTime = 'Exit position';
-                        action = 'Consider taking profits';
+                        holdTime = 'Exit now';
                     }
                     
                     return {
@@ -294,31 +194,101 @@
                         symbol: coin.symbol.toUpperCase(),
                         name: coin.name,
                         price: coin.current_price,
-                        c1h, c24, c7d,
-                        mc, vol,
-                        score,
-                        signal,
-                        holdTime,
-                        action,
+                        c24: c24,
+                        score: score,
+                        signal: signal,
+                        holdTime: holdTime,
                         image: coin.image
                     };
                 });
                 
                 // Update ETH price
-                const ethCoin = marketData.find(c => c.id === 'ethereum');
-                if (ethCoin) ethPrice = ethCoin.price;
+                const eth = marketData.find(c => c.id === 'ethereum');
+                if (eth) ethPrice = eth.price;
                 
-                return true;
             } catch (e) {
-                console.error('Fetch error:', e);
-                // Fallback
+                console.log('Using fallback data');
+                // Fallback if API fails
                 marketData = [
-                    {id:'pepe', symbol:'PEPE', name:'Pepe', price:0.0000038, c24:5.2, score:78, signal:'STRONG BUY', holdTime:'2-3 days', action:'Buy immediately', image:'https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg'},
-                    {id:'shiba-inu', symbol:'SHIB', name:'Shiba Inu', price:0.000015, c24:2.1, score:65, signal:'BUY', holdTime:'3-5 days', action:'Good entry', image:'https://assets.coingecko.com/coins/images/11939/small/shiba.png'},
-                    {id:'floki', symbol:'FLOKI', name:'Floki', price:0.000075, c24:8.7, score:72, signal:'BUY', holdTime:'3-5 days', action:'Strong momentum', image:'https://assets.coingecko.com/coins/images/16746/small/Floki.png'}
+                    {id:'pepe', symbol:'PEPE', name:'Pepe', price:0.0000038, c24:5.2, score:78, signal:'STRONG BUY', holdTime:'2-3 days', image:'https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg'},
+                    {id:'shiba-inu', symbol:'SHIB', name:'Shiba Inu', price:0.000015, c24:2.1, score:65, signal:'BUY', holdTime:'3-5 days', image:'https://assets.coingecko.com/coins/images/11939/small/shiba.png'},
+                    {id:'floki', symbol:'FLOKI', name:'Floki', price:0.000075, c24:8.7, score:72, signal:'BUY', holdTime:'3-5 days', image:'https://assets.coingecko.com/coins/images/16746/small/Floki.png'},
+                    {id:'bonk', symbol:'BONK', name:'Bonk', price:0.000015, c24:-2.3, score:45, signal:'HOLD', holdTime:'Wait', image:'https://assets.coingecko.com/coins/images/28600/small/bonk.jpg'},
+                    {id:'wojak', symbol:'WOJAK', name:'Wojak', price:0.00085, c24:12.3, score:82, signal:'STRONG BUY', holdTime:'1-2 days', image:'https://assets.coingecko.com/coins/images/30226/small/wojak.jpeg'}
                 ];
-                return true;
             }
+            
+            renderMarket();
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('marketList').classList.remove('hidden');
+        }
+
+        function renderMarket() {
+            const list = document.getElementById('marketList');
+            list.innerHTML = marketData.filter(c => c.id !== 'ethereum').map(coin => {
+                const cls = coin.signal === 'STRONG BUY' ? 'signal-strong-buy' : 
+                           coin.signal === 'BUY' ? 'signal-buy' : 'signal-hold';
+                const price = coin.price < 0.001 ? '$' + coin.price.toExponential(2) : '$' + coin.price.toFixed(6);
+                
+                return `
+                    <div class="glass ${cls}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${coin.image}" style="width: 40px; height: 40px; border-radius: 50%;">
+                                <div>
+                                    <div style="font-size: 18px; font-weight: 700;">${coin.symbol}</div>
+                                    <div style="font-size: 11px; color: #888;">${coin.name}</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="background: ${coin.signal.includes('BUY') ? 'rgba(0,255,136,0.2)' : 'rgba(255,193,7,0.2)'}; color: ${coin.signal.includes('BUY') ? '#00ff88' : '#ffc107'}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">${coin.signal}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 22px; font-family: monospace;">${price}</div>
+                            <div style="color: ${coin.c24 >= 0 ? '#00ff88' : '#ff3366'}; font-weight: 700;">
+                                ${coin.c24 >= 0 ? '+' : ''}${coin.c24.toFixed(1)}%
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; padding: 8px; background: rgba(0,200,255,0.1); border-radius: 8px; font-size: 12px; color: #00c8ff;">
+                            ⏱️ Hold: <strong>${coin.holdTime}</strong>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            renderTrades();
+        }
+
+        function renderTrades() {
+            const opportunities = marketData.filter(c => c.signal.includes('BUY'));
+            const list = document.getElementById('tradesList');
+            
+            if (opportunities.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No buy signals right now. Wait for better entries.</div>';
+                return;
+            }
+            
+            list.innerHTML = opportunities.map((coin, i) => `
+                <div class="glass signal-buy">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <div style="background: #00ff88; color: black; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">${i + 1}</div>
+                        <img src="${coin.image}" style="width: 36px; height: 36px; border-radius: 50%;">
+                        <div>
+                            <div style="font-size: 16px; font-weight: 700;">${coin.symbol}</div>
+                            <div style="font-size: 10px; color: #888;">Score: ${coin.score}</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">ACTION:</div>
+                        <div style="font-size: 14px; color: white; font-weight: 600;">Buy and hold for ${coin.holdTime}</div>
+                    </div>
+                    <div style="font-size: 11px; color: #666;">
+                        Current: ${coin.price < 0.001 ? '$' + coin.price.toExponential(2) : '$' + coin.price.toFixed(6)} • 
+                        24h: <span style="color: ${coin.c24 >= 0 ? '#00ff88' : '#ff3366'}">${coin.c24 >= 0 ? '+' : ''}${coin.c24.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         async function connectWallet() {
@@ -337,11 +307,12 @@
                 document.getElementById('myPortfolio').classList.remove('hidden');
                 document.getElementById('noWallet').style.display = 'none';
                 
-                showToast('Wallet connected! Analyzing...');
+                showToast('Wallet connected!');
                 await analyzePortfolio();
                 
             } catch(e) {
                 showToast('Connection failed', true);
+                console.error(e);
             }
         }
 
@@ -350,41 +321,43 @@
             
             try {
                 // Get ETH balance
-                const ethBal = await provider.getBalance(address);
-                const ethAmount = parseFloat(ethers.utils.formatEther(ethBal));
+                const bal = await provider.getBalance(address);
+                const ethAmount = parseFloat(ethers.utils.formatEther(bal));
                 const ethValue = ethAmount * ethPrice;
                 
-                document.getElementById('ethBalance').textContent = ethAmount.toFixed(4) + ' ETH';
+                document.getElementById('portValue').textContent = '$' + ethValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('ethBal').textContent = ethAmount.toFixed(4) + ' ETH';
                 
-                // Check for token balances (simplified - in real app you'd check multiple tokens)
-                userHoldings = [];
-                let totalValue = ethValue;
-                
-                // For demo, simulate checking PEPE balance (in production, loop through tokenContracts)
-                // This is where you'd actually call balanceOf for each token
-                
-                // For now, show ETH portfolio analysis
+                // Simple advice based on ETH trend
                 const ethCoin = marketData.find(c => c.id === 'ethereum');
-                let advice = '';
-                
+                let advice = 'ETH is stable. Hold for long term.';
                 if (ethCoin) {
-                    if (ethCoin.score >= 60) {
-                        advice = 'ETH showing strength. Hold current position or DCA in.';
-                    } else if (ethCoin.score < 40) {
-                        advice = 'Consider taking some ETH profits. Market overheated.';
-                    } else {
-                        advice = 'ETH stable. Hold for long term.';
-                    }
+                    if (ethCoin.c24 > 5) advice = 'ETH pumping! Consider taking some profits.';
+                    else if (ethCoin.c24 < -5) advice = 'ETH dipping. Good time to DCA (dollar cost average).';
                 }
                 
-                // Calculate total portfolio value (ETH + tokens)
-                // In real implementation, sum all token values here
+                document.getElementById('aiAdvice').textContent = advice;
                 
-                document.getElementById('realPortValue').textContent = '$' + totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                document.getElementById('realPortChange').textContent = ethAmount.toFixed(4) + ' ETH @ $' + ethPrice.toFixed(0);
-                document.getElementById('portfolioAdvice').textContent = advice;
-                
-                renderMyAssets();
+                // Render assets
+                document.getElementById('assetsList').innerHTML = `
+                    <div class="glass">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" style="width: 40px; height: 40px; border-radius: 50%;">
+                                <div>
+                                    <div style="font-size: 18px; font-weight: 700;">ETH</div>
+                                    <div style="font-size: 11px; color: #888;">${ethAmount.toFixed(4)} tokens</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 18px; font-weight: 700;">$${ethValue.toFixed(2)}</div>
+                                <div style="font-size: 11px; color: ${ethCoin && ethCoin.c24 >= 0 ? '#00ff88' : '#ff3366'};">
+                                    ${ethCoin ? (ethCoin.c24 >= 0 ? '+' : '') + ethCoin.c24.toFixed(1) + '%' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 
             } catch(e) {
                 console.error('Analysis error:', e);
@@ -392,218 +365,46 @@
             }
         }
 
-        function calculateHoldTime(coin) {
-            // Volatility-based hold time calculation
-            const volatility = Math.abs(coin.c24) + Math.abs(coin.c7d / 7);
-            
-            if (volatility > 20) return '1-2 days (high volatility - take profits quick)';
-            if (volatility > 10) return '2-4 days (moderate momentum)';
-            if (volatility > 5) return '5-7 days (steady growth)';
-            return '7+ days (long term hold)';
-        }
-
-        function renderMarket() {
-            const list = document.getElementById('marketList');
-            list.innerHTML = marketData.filter(c => c.id !== 'ethereum').map(coin => {
-                const signalClass = coin.signal === 'STRONG BUY' ? 'signal-strong-buy' : 
-                                   coin.signal === 'BUY' ? 'signal-buy' :
-                                   coin.signal === 'SELL' ? 'signal-sell' : 'signal-hold';
-                
-                const priceStr = coin.price < 0.001 ? '$' + coin.price.toExponential(2) : '$' + coin.price.toFixed(6);
-                
-                return `
-                    <div class="glass ${signalClass}" onclick="showAnalysis('${coin.id}')" style="cursor: pointer;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${coin.image}" style="width: 40px; height: 40px; border-radius: 50%;">
-                                <div>
-                                    <div style="font-size: 18px; font-weight: 700;">${coin.symbol}</div>
-                                    <div style="font-size: 11px; color: #888;">${coin.name}</div>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="background: ${coin.signal.includes('BUY') ? 'rgba(0,255,136,0.2)' : coin.signal === 'SELL' ? 'rgba(255,51,102,0.2)' : 'rgba(255,193,7,0.2)'}; color: ${coin.signal.includes('BUY') ? '#00ff88' : coin.signal === 'SELL' ? '#ff3366' : '#ffc107'}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;">${coin.signal}</div>
-                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Score: ${coin.score}</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="font-size: 22px; font-family: monospace;">${priceStr}</div>
-                            <div style="color: ${coin.c24 >= 0 ? '#00ff88' : '#ff3366'}; font-weight: 700;">
-                                ${coin.c24 >= 0 ? '+' : ''}${coin.c24.toFixed(1)}%
-                            </div>
-                        </div>
-                        
-                        <div class="hold-time">
-                            <div style="font-size: 11px; color: #00c8ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">⏱️ Recommended Hold Time</div>
-                            <div style="font-size: 16px; font-weight: 700; color: white;">${coin.holdTime}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('marketList').classList.remove('hidden');
-        }
-
-        function renderMyAssets() {
-            // Show ETH and any tokens found
-            let html = '';
-            
-            if (address) {
-                html += `
-                    <div class="position-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" style="width: 40px; height: 40px; border-radius: 50%;">
-                                <div>
-                                    <div style="font-size: 18px; font-weight: 700;">ETH</div>
-                                    <div style="font-size: 11px; color: #888;">Ethereum</div>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 18px; font-weight: 700;">Fetching...</div>
-                            </div>
-                        </div>
-                        <div id="ethDetail" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                            <p style="margin: 0; color: #00ff88; font-size: 13px;">Connect to see details</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('assetsList').innerHTML = html;
-        }
-
-        function renderOpportunities() {
-            // Show only BUY and STRONG BUY signals sorted by score
-            const opportunities = marketData
-                .filter(c => c.signal.includes('BUY'))
-                .sort((a, b) => b.score - a.score);
-            
-            const list = document.getElementById('opportunitiesList');
-            
-            if (opportunities.length === 0) {
-                list.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No strong buy signals right now. Wait for better entries.</div>';
-                return;
-            }
-            
-            list.innerHTML = opportunities.map((coin, index) => {
-                const priceStr = coin.price < 0.001 ? '$' + coin.price.toExponential(2) : '$' + coin.price.toFixed(6);
-                
-                return `
-                    <div class="glass signal-buy" style="margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="background: #00ff88; color: black; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">${index + 1}</div>
-                                <img src="${coin.image}" style="width: 36px; height: 36px; border-radius: 50%;">
-                                <div>
-                                    <div style="font-size: 16px; font-weight: 700;">${coin.symbol}</div>
-                                    <div style="font-size: 10px; color: #888;">AI Score: ${coin.score}</div>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 16px; font-weight: 700;">${priceStr}</div>
-                                <div style="font-size: 11px; color: ${coin.c24 >= 0 ? '#00ff88' : '#ff3366'};">${coin.c24 >= 0 ? '+' : ''}${coin.c24.toFixed(1)}%</div>
-                            </div>
-                        </div>
-                        
-                        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                            <div style="font-size: 11px; color: #888; margin-bottom: 4px;">📋 ACTION PLAN:</div>
-                            <div style="font-size: 14px; color: white; font-weight: 600;">${coin.action}</div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1; background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.3); border-radius: 8px; padding: 8px; text-align: center;">
-                                <div style="font-size: 10px; color: #00c8ff; text-transform: uppercase;">Hold Time</div>
-                                <div style="font-size: 12px; font-weight: 700; color: white; margin-top: 2px;">${coin.holdTime.split(' ')[0]}</div>
-                            </div>
-                            <div style="flex: 1; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 8px; padding: 8px; text-align: center;">
-                                <div style="font-size: 10px; color: #00ff88; text-transform: uppercase;">Confidence</div>
-                                <div style="font-size: 12px; font-weight: 700; color: white; margin-top: 2px;">${coin.score}%</div>
-                            </div>
-                        </div>
-                        
-                        <button onclick="showAnalysis('${coin.id}')" class="btn btn-green" style="margin-top: 12px; font-size: 13px; padding: 10px;">View Full Analysis</button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function showAnalysis(coinId) {
-            const coin = marketData.find(c => c.id === coinId);
-            if (!coin) return;
-            
-            const priceStr = coin.price < 0.001 ? '$' + coin.price.toExponential(4) : '$' + coin.price.toFixed(8);
-            
-            document.getElementById('analysisContent').innerHTML = `
-                <div class="glass">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                        <img src="${coin.image}" style="width: 60px; height: 60px; border-radius: 50%;">
-                        <div>
-                            <h3 style="margin: 0; font-size: 28px;">${coin.symbol}</h3>
-                            <p style="margin: 4px 0 0 0; color: #00ff88; font-family: monospace; font-size: 20px;">${priceStr}</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: ${coin.signal.includes('BUY') ? 'rgba(0,255,136,0.1)' : coin.signal === 'SELL' ? 'rgba(255,51,102,0.1)' : 'rgba(255,193,7,0.1)'}; border: 1px solid ${coin.signal.includes('BUY') ? '#00ff88' : coin.signal === 'SELL' ? '#ff3366' : '#ffc107'}; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                        <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Signal</div>
-                        <div style="font-size: 24px; font-weight: 800; color: ${coin.signal.includes('BUY') ? '#00ff88' : coin.signal === 'SELL' ? '#ff3366' : '#ffc107'};">${coin.signal}</div>
-                        <div style="margin-top: 8px; font-size: 14px; color: white;">${coin.action}</div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <h4 style="margin: 0 0 12px 0; font-size: 16px;">⏱️ Hold Time Recommendation</h4>
-                        <div style="background: rgba(0,200,255,0.1); border-left: 3px solid #00c8ff; padding: 12px; border-radius: 0 8px 8px 0;">
-                            <p style="margin: 0; font-size: 18px; font-weight: 700; color: white;">${coin.holdTime}</p>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <h4 style="margin: 0 0 12px 0; font-size: 16px;">📊 Technical Analysis</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div class="glass" style="text-align: center; margin: 0;">
-                                <div style="font-size: 11px; color: #888;">1h Change</div>
-                                <div style="font-size: 18px; font-weight: 700; color: ${coin.c1h >= 0 ? '#00ff88' : '#ff3366'};">${coin.c1h >= 0 ? '+' : ''}${coin.c1h.toFixed(2)}%</div>
-                            </div>
-                            <div class="glass" style="text-align: center; margin: 0;">
-                                <div style="font-size: 11px; color: #888;">24h Change</div>
-                                <div style="font-size: 18px; font-weight: 700; color: ${coin.c24 >= 0 ? '#00ff88' : '#ff3366'};">${coin.c24 >= 0 ? '+' : ''}${coin.c24.toFixed(2)}%</div>
-                            </div>
-                            <div class="glass" style="text-align: center; margin: 0;">
-                                <div style="font-size: 11px; color: #888;">7d Change</div>
-                                <div style="font-size: 18px; font-weight: 700; color: ${coin.c7d >= 0 ? '#00ff88' : '#ff3366'};">${coin.c7d >= 0 ? '+' : ''}${coin.c7d.toFixed(2)}%</div>
-                            </div>
-                            <div class="glass" style="text-align: center; margin: 0;">
-                                <div style="font-size: 11px; color: #888;">AI Score</div>
-                                <div style="font-size: 18px; font-weight: 700; color: ${coin.score >= 60 ? '#00ff88' : coin.score >= 40 ? '#ffc107' : '#ff3366'};">${coin.score}/100</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="glass" style="background: rgba(0,0,0,0.3);">
-                        <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #888;">💡 Trading Strategy</h4>
-                        <p style="margin: 0; font-size: 14px; line-height: 1.5;">
-                            ${coin.score >= 75 ? 'Strong momentum detected. Enter position with 2-3% of portfolio. Set stop loss at -10% and take profit at +50%.' : 
-                              coin.score >= 60 ? 'Favorable conditions. Consider dollar-cost averaging in over 2-3 days. Hold for 3-5 days minimum.' :
-                              coin.score >= 40 ? 'Neutral conditions. Wait for breakout above resistance or better entry point.' :
-                              'Weak momentum. If holding, consider taking profits. If not holding, wait for trend reversal.'}
-                        </p>
-                    </div>
-                    
-                    <button onclick="closeModal()" class="btn" style="margin-top: 20px; background: rgba(255,255,255,0.1);">Close Analysis</button>
-                </div>
-            `;
-            
-            document.getElementById('analysisModal').style.display = 'block';
-        }
-
         function showTab(tab) {
-            ['market', 'myassets', 'opportunities'].forEach(t => {
+            ['market', 'myassets', 'trades'].forEach(t => {
                 document.getElementById('view-' + t).classList.add('hidden');
-                document.getElementById('tab-' + t).style.background = 'rgba(255,255,255,0.1)';
-                document.getElementById('tab-' + t).style.color = 'white';
+                const btn = document.getElementById('tab-' + t);
+                if (btn) {
+                    btn.style.background = 'rgba(255,255,255,0.1)';
+                    btn.style.color = 'white';
+                }
             });
             
             document.getElementById('view-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + t
+            const activeBtn = document.getElementById('tab-' + tab);
+            if (activeBtn) {
+                activeBtn.style.background = 'rgba(0,255,136,0.2)';
+                activeBtn.style.color = '#00ff88';
+            }
+            
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                const map = ['market', 'myassets', null, 'trades'];
+                btn.classList.toggle('active', map[i] === tab);
+            });
+            
+            if (tab === 'myassets' && address) analyzePortfolio();
+        }
+
+        async function refresh() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('marketList').classList.add('hidden');
+            await loadData();
+            showToast('Data refreshed!');
+        }
+
+        function showToast(msg, isError) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.background = isError ? 'rgba(255,51,102,0.9)' : 'rgba(0,255,136,0.9)';
+            t.style.color = isError ? '#fff' : '#000';
+            setTimeout(() => t.style.opacity = '0', 3000);
+        }
+    </script>
+</body>
+</html>
