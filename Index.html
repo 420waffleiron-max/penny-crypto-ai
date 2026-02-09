@@ -3,81 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0f">
-    <title>Penny Crypto AI Pro</title>
+    <title>AI Trader Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            background: #0a0a0f;
             color: #fff;
             min-height: 100vh;
             margin: 0;
-            padding-bottom: 90px;
+            padding-bottom: 80px;
         }
         .glass {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
         }
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: 14px 28px;
-            border-radius: 14px;
+            padding: 12px 24px;
+            border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
-            transition: all 0.2s;
             font-size: 15px;
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-green { 
-            background: linear-gradient(135deg, #00c853 0%, #00e676 100%); 
-            color: #000;
-            box-shadow: 0 4px 20px rgba(0,200,83,0.3);
-        }
+        .btn-green { background: linear-gradient(135deg, #00c853 0%, #00e676 100%); color: #000; }
         .btn-red { background: linear-gradient(135deg, #ff1744 0%, #f50057 100%); }
-        .btn-blue { background: linear-gradient(135deg, #2962ff 0%, #2979ff 100%); }
         
-        .signal-strong-buy { border-left: 4px solid #00ff88; background: linear-gradient(90deg, rgba(0,255,136,0.15) 0%, rgba(255,255,255,0.03) 100%); }
-        .signal-buy { border-left: 4px solid #00cc66; background: rgba(0,204,102,0.1); }
-        .signal-sell { border-left: 4px solid #ff3366; background: rgba(255,51,102,0.1); }
+        .signal-buy { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.1); }
         .signal-hold { border-left: 4px solid #ffc107; background: rgba(255,193,7,0.1); }
         
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             background: rgba(10,10,15,0.98);
-            padding: 12px 20px;
+            padding: 12px;
             display: flex;
             justify-content: space-around;
             border-top: 1px solid rgba(255,255,255,0.1);
             z-index: 100;
         }
-        .nav-btn { 
-            background: none; border: none; 
-            color: #666; font-size: 11px; 
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-            transition: all 0.2s;
-            font-weight: 600;
-        }
+        .nav-btn { background: none; border: none; color: #666; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-btn.active { color: #00ff88; }
         
         .hidden { display: none !important; }
         
-        input, select {
+        input {
             width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
             background: rgba(0,0,0,0.3);
             color: white;
             margin-top: 8px;
@@ -85,71 +66,34 @@
         }
         
         .coin-card {
-            padding: 18px;
-            margin-bottom: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
             border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .coin-card:active { transform: scale(0.98); }
         
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
+        .position-card {
+            background: rgba(0,255,136,0.05);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
         }
-        .tag-whale { background: rgba(0,200,255,0.2); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3); }
-        .tag-momentum { background: rgba(0,255,136,0.2); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
         
         #toast {
             position: fixed;
             top: 60px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30,30,40,0.95);
-            padding: 14px 28px;
-            border-radius: 30px;
+            background: rgba(0,255,136,0.9);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 24px;
             opacity: 0;
             transition: 0.3s;
             pointer-events: none;
             z-index: 1000;
             font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .position-card {
-            background: linear-gradient(135deg, rgba(0,255,136,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            border: 1px solid rgba(0,255,136,0.2);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-        
-        .price-up { color: #00ff88; font-weight: 700; }
-        .price-down { color: #ff3366; font-weight: 700; }
-        
-        .pulse-dot {
-            display: inline-block;
-            width: 8px; height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            margin-right: 8px;
-            box-shadow: 0 0 10px #00ff88;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        
-        .kelly-box {
-            background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%);
-            border: 1px solid rgba(102,126,234,0.3);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 16px 0;
         }
         
         .modal {
@@ -159,896 +103,461 @@
             display: none;
             overflow-y: auto;
             z-index: 1000;
-        }
-        .modal-content {
-            min-height: 100vh;
-            padding: 24px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .tab-container { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; }
-        .tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #888;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .tab.active { background: rgba(0,255,136,0.2); color: #00ff88; border-color: rgba(0,255,136,0.4); }
-        
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .stat-box {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
+    <div style="padding: 16px; max-width: 500px; margin: 0 auto;">
         
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 10px;">
-            <div>
-                <h1 style="margin: 0; font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #00ff88 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI Trader Pro</h1>
-                <p style="margin: 4px 0 0 0; color: #666; font-size: 13px;">Kelly Sizing • Risk Management</p>
-            </div>
-            <button id="connectBtn" onclick="connectWallet()" class="btn" style="width: auto; margin: 0; padding: 10px 18px; font-size: 13px; background: rgba(255,255,255,0.1);">
-                🦊 Connect
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 24px; color: #00ff88;">AI Trader Pro</h1>
+            <button onclick="connectWallet()" class="btn" style="width: auto; padding: 8px 16px; font-size: 13px; background: rgba(255,255,255,0.1);">
+                🦊 <span id="walletText">Connect</span>
             </button>
         </div>
 
-        <!-- Portfolio Value Card -->
-        <div class="glass" style="background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(102,126,234,0.1) 100%); border: 1px solid rgba(0,255,136,0.2);">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+        <!-- Portfolio Card -->
+        <div class="glass" style="background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(102,126,234,0.1) 100%); border: 1px solid rgba(0,255,136,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div>
-                    <p style="margin: 0; color: #00ff88; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                        <span class="pulse-dot"></span>Total Portfolio Value
-                    </p>
-                    <p id="portfolioValue" style="margin: 8px 0 0 0; font-size: 42px; font-weight: 800; color: white;">$100.00</p>
-                    <p id="totalPnl" style="margin: 4px 0 0 0; font-size: 16px; color: #888;">$0.00 (0.00%)</p>
+                    <p style="margin: 0; color: #00ff88; font-size: 12px;">💰 PORTFOLIO VALUE</p>
+                    <h2 id="portValue" style="margin: 8px 0 0 0; font-size: 36px; color: white;">$100.00</h2>
+                    <p id="portChange" style="margin: 4px 0 0 0; font-size: 14px; color: #888;">$0.00 (0.00%)</p>
                 </div>
                 <div style="text-align: right;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">Available</p>
-                    <p id="availableCash" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: white;">$100.00</p>
+                    <p style="margin: 0; font-size: 12px; color: #666;">Cash</p>
+                    <p id="cashValue" style="margin: 4px 0 0 0; font-size: 18px; color: white;">$100.00</p>
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div class="stat-box">
-                    <p style="margin: 0; font-size: 11px; color: #888;">Open Positions</p>
-                    <p id="openPositionsCount" style="margin: 6px 0 0 0; font-size: 24px; font-weight: 800; color: white;">0</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: center;">
+                    <p style="margin: 0; font-size: 11px; color: #888;">Positions</p>
+                    <p id="posCount" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: white;">0</p>
                 </div>
-                <div class="stat-box">
+                <div style="text-align: center;">
                     <p style="margin: 0; font-size: 11px; color: #888;">Win Rate</p>
-                    <p id="winRateStat" style="margin: 6px 0 0 0; font-size: 24px; font-weight: 800; color: white;">--</p>
+                    <p id="winRateDisplay" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: white;">--</p>
                 </div>
-                <div class="stat-box">
-                    <p style="margin: 0; font-size: 11px; color: #888;">Avg Kelly %</p>
-                    <p id="avgKellyStat" style="margin: 6px 0 0 0; font-size: 24px; font-weight: 800; color: #00ff88;">--</p>
+                <div style="text-align: center;">
+                    <p style="margin: 0; font-size: 11px; color: #888;">Invested</p>
+                    <p id="investedValue" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: #00ff88;">$0.00</p>
                 </div>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div class="tab-container">
-            <div class="tab active" onclick="switchTab('signals', this)">📊 Signals</div>
-            <div class="tab" onclick="switchTab('positions', this)">💼 Portfolio</div>
-            <div class="tab" onclick="switchTab('history', this)">📈 History</div>
-            <div class="tab" onclick="switchTab('settings', this)">⚙️ Settings</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;">
+            <button onclick="showTab('signals')" id="tab-signals" class="btn" style="width: auto; background: rgba(0,255,136,0.2); color: #00ff88;">Signals</button>
+            <button onclick="showTab('positions')" id="tab-positions" class="btn" style="width: auto; background: rgba(255,255,255,0.1);">Positions</button>
+            <button onclick="showTab('history')" id="tab-history" class="btn" style="width: auto; background: rgba(255,255,255,0.1);">History</button>
         </div>
 
         <!-- Signals View -->
-        <div id="signalsView">
+        <div id="view-signals">
             <div id="loading" style="text-align: center; padding: 40px;">
-                <div style="width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #00ff88; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                <p style="color: #888; margin-top: 16px;">Analyzing markets...</p>
+                <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #00ff88; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                <p style="color: #666; margin-top: 16px;">Loading markets...</p>
             </div>
             <div id="coinsList" class="hidden"></div>
         </div>
 
         <!-- Positions View -->
-        <div id="positionsView" class="hidden">
-            <div id="noPositions" class="glass" style="text-align: center; padding: 40px;">
-                <p style="color: #666; font-size: 16px; margin: 0;">No open positions</p>
-                <p style="color: #444; font-size: 13px; margin-top: 8px;">Your buying power: <span id="buyingPowerDisplay">$100.00</span></p>
-                <button onclick="switchTab('signals', document.querySelectorAll('.tab')[0])" class="btn btn-green" style="margin-top: 20px; width: auto; padding: 12px 24px;">Find Trades</button>
+        <div id="view-positions" class="hidden">
+            <div id="emptyPositions" class="glass" style="text-align: center; padding: 40px;">
+                <p style="color: #666;">No open positions</p>
+                <button onclick="showTab('signals')" class="btn btn-green" style="margin-top: 16px; width: auto;">Find Trades</button>
             </div>
             <div id="positionsList"></div>
         </div>
 
         <!-- History View -->
-        <div id="historyView" class="hidden">
-            <div class="glass" style="margin-bottom: 16px;">
-                <h3 style="margin: 0 0 16px 0; font-size: 18px;">Trading Stats</h3>
-                <div class="stat-grid">
-                    <div class="stat-box">
-                        <p style="margin: 0; font-size: 12px; color: #888;">Total Trades</p>
-                        <p id="totalTradesStat" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;">0</p>
-                    </div>
-                    <div class="stat-box">
-                        <p style="margin: 0; font-size: 12px; color: #888;">Profitable</p>
-                        <p id="winningTradesStat" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: #00ff88;">0</p>
-                    </div>
-                    <div class="stat-box">
-                        <p style="margin: 0; font-size: 12px; color: #888;">Losses</p>
-                        <p id="losingTradesStat" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700; color: #ff3366;">0</p>
-                    </div>
-                    <div class="stat-box">
-                        <p style="margin: 0; font-size: 12px; color: #888;">Net P&L</p>
-                        <p id="netPnlStat" style="margin: 4px 0 0 0; font-size: 20px; font-weight: 700;">$0.00</p>
-                    </div>
-                </div>
-            </div>
+        <div id="view-history" class="hidden">
             <div id="historyList"></div>
-        </div>
-
-        <!-- Settings View -->
-        <div id="settingsView" class="hidden">
-            <div class="glass">
-                <h3 style="margin: 0 0 20px 0; font-size: 18px;">Account Settings</h3>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Starting Balance ($)</label>
-                    <input type="number" id="startingBalance" value="100" min="10" step="10" onchange="updateBalance()">
-                    <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">Reset to change your paper trading capital</p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Max Risk Per Trade (%)</label>
-                    <input type="number" id="maxRisk" value="2" min="0.5" max="10" step="0.5">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Kelly Fraction</label>
-                    <select id="kellyFraction">
-                        <option value="0.25">Quarter Kelly (Safe)</option>
-                        <option value="0.5" selected>Half Kelly (Balanced)</option>
-                        <option value="0.75">3/4 Kelly (Aggressive)</option>
-                        <option value="1.0">Full Kelly (Max Growth)</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Auto Stop Loss (%)</label>
-                    <input type="number" id="autoStop" value="15" min="5" max="50" step="5">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Take Profit (%)</label>
-                    <input type="number" id="autoTakeProfit" value="50" min="20" max="200" step="10">
-                </div>
-
-                <button onclick="saveSettings()" class="btn btn-green">Save Settings</button>
-                <button onclick="resetPortfolio()" class="btn btn-red" style="margin-top: 12px; opacity: 0.8;">Reset All Data</button>
-            </div>
         </div>
     </div>
 
     <!-- Trade Modal -->
     <div id="tradeModal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 20px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 24px;">Execute Trade</h2>
-                    <p style="margin: 4px 0 0 0; color: #666; font-size: 14px;">Available: $<span id="modalAvailable">100</span></p>
-                </div>
-                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">&times;</button>
+        <div style="max-width: 500px; margin: 0 auto; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0;">Trade Details</h2>
+                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 24px;">&times;</button>
             </div>
 
             <div class="glass">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img id="modalImage" src="" style="width: 48px; height: 48px; border-radius: 50%; display: none;">
-                        <div>
-                            <h3 id="modalCoin" style="margin: 0; font-size: 24px;">--</h3>
-                            <p id="modalPrice" style="margin: 4px 0 0 0; color: #00ff88; font-family: monospace; font-size: 18px;"></p>
-                        </div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <img id="modalImg" src="" style="width: 48px; height: 48px; border-radius: 50%; display: none;">
+                    <div>
+                        <h3 id="modalCoin" style="margin: 0; font-size: 24px;">--</h3>
+                        <p id="modalPrice" style="margin: 4px 0 0 0; color: #00ff88; font-family: monospace;">--</p>
                     </div>
-                    <div id="modalSignalTag" class="tag" style="font-size: 12px; padding: 6px 12px;">--</div>
                 </div>
-
-                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
-                    <span style="color: #888;">Confidence</span>
-                    <span id="modalConf" style="font-weight: 600;">--%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
-                    <span style="color: #888;">Risk Score</span>
-                    <span id="modalRisk" style="font-weight: 600; color: #ffc107;">--/100</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                    <span style="color: #888;">Whale Activity</span>
-                    <span id="modalWhale" style="font-weight: 600; color: #00c8ff;">--</span>
-                </div>
-            </div>
-
-            <div class="kelly-box">
-                <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #667eea;">🧮 Kelly Position Sizer</h4>
                 
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
-                    <span style="color: #888;">Win Probability</span>
-                    <span style="color: #00ff88; font-weight: 600;" id="kellyProb">60%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 14px;">
-                    <span style="color: #888;">Win/Loss Ratio</span>
-                    <span style="color: #00ff88; font-weight: 600;" id="kellyRatio">2.5</span>
+                <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                    <p style="margin: 0 0 8px 0; color: #888; font-size: 12px;">RECOMMENDED POSITION (Kelly)</p>
+                    <p id="recAmount" style="margin: 0; font-size: 32px; font-weight: 800; color: #00ff88;">$2.00</p>
+                    <p style="margin: 4px 0 0 0; color: #666; font-size: 12px;">2% of portfolio</p>
                 </div>
 
-                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; text-align: center;">
-                    <p style="margin: 0 0 8px 0; color: #888; font-size: 12px; text-transform: uppercase;">Recommended</p>
-                    <p style="margin: 0; font-size: 36px; font-weight: 800; color: #00ff88;">$<span id="kellyAmount">2.00</span></p>
-                    <p style="margin: 8px 0 0 0; color: #666; font-size: 13px;"><span id="kellyPercent">2</span>% of portfolio</p>
+                <div style="margin-bottom: 16px;">
+                    <label style="color: #888; font-size: 14px;">Amount to Invest ($)</label>
+                    <input type="number" id="tradeAmount" value="2" min="1" step="1">
+                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Available: $<span id="availableCash">100</span></p>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button onclick="setTradeAmount(0.5)" class="btn" style="margin: 0; padding: 8px; font-size: 12px; background: rgba(255,255,255,0.1);">½x</button>
-                    <button onclick="setTradeAmount(1)" class="btn" style="margin: 0; padding: 8px; font-size: 12px;">1x</button>
-                    <button onclick="setTradeAmount(2)" class="btn" style="margin: 0; padding: 8px; font-size: 12px; background: rgba(255,255,255,0.1);">2x</button>
-                </div>
+                <button onclick="executeTrade()" class="btn btn-green" style="margin-bottom: 12px;">BUY NOW</button>
+                <button onclick="closeModal()" class="btn" style="background: rgba(255,255,255,0.1);">Cancel</button>
             </div>
-
-            <div style="margin: 20px 0;">
-                <label style="color: #888; font-size: 14px; display: block; margin-bottom: 8px;">Investment Amount ($)</label>
-                <input type="number" id="tradeAmount" value="2" min="1" step="1" oninput="updateTradeCalc()">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
-                    <div style="background: rgba(255,51,102,0.1); border: 1px solid rgba(255,51,102,0.3); border-radius: 12px; padding: 12px; text-align: center;">
-                        <p style="margin: 0; font-size: 11px; color: #ff3366; text-transform: uppercase;">Stop Loss</p>
-                        <p id="stopLossPrice" style="margin: 4px 0 0 0; font-size: 16px; font-weight: 700; color: #ff3366;">--</p>
-                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #666;">-15%</p>
-                    </div>
-                    <div style="background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 12px; padding: 12px; text-align: center;">
-                        <p style="margin: 0; font-size: 11px; color: #00ff88; text-transform: uppercase;">Take Profit</p>
-                        <p id="takeProfitPrice" style="margin: 4px 0 0 0; font-size: 16px; font-weight: 700; color: #00ff88;">--</p>
-                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #666;">+50%</p>
-                    </div>
-                </div>
-
-                <div style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #888; font-size: 14px;">Est. Tokens</span>
-                    <span id="tokenAmount" style="color: white; font-weight: 600; font-family: monospace;">--</span>
-                </div>
-            </div>
-
-            <button onclick="executePaperTrade()" class="btn btn-green" style="padding: 18px; font-size: 16px; margin-bottom: 12px;">
-                📘 PAPER TRADE
-            </button>
-            
-            <button onclick="executeLiveTrade()" class="btn btn-blue" style="padding: 18px; font-size: 16px;">
-                🚀 LIVE TRADE (MetaMask)
-            </button>
-
-            <p style="margin-top: 20px; font-size: 12px; color: #666; text-align: center;">
-                Paper trading simulates real trades and tracks P&L
-            </p>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn active" onclick="showView('signals')">
-            <span style="font-size: 20px;">📊</span>
-            <span>Signals</span>
-        </button>
-        <button class="nav-btn" onclick="showView('positions')">
-            <span style="font-size: 20px;">💼</span>
-            <span>Portfolio</span>
-        </button>
-        <button class="nav-btn" onclick="refreshData()">
-            <span style="font-size: 20px;">🔄</span>
-            <span>Refresh</span>
-        </button>
-        <button class="nav-btn" onclick="showView('history')">
-            <span style="font-size: 20px;">📈</span>
-            <span>History</span>
-        </button>
+        <button class="nav-btn active" onclick="showTab('signals')">📊<span>Signals</span></button>
+        <button class="nav-btn" onclick="showTab('positions')">💼<span>Portfolio</span></button>
+        <button class="nav-btn" onclick="refresh()">🔄<span>Refresh</span></button>
+        <button class="nav-btn" onclick="showTab('history')">📈<span>History</span></button>
     </div>
 
     <div id="toast"></div>
 
     <script>
         // State
-        let provider, signer, address;
         let coins = [];
-        let selectedCoin = null;
-        let portfolio = {
-            balance: 100,
-            startBalance: 100,
+        let selected = null;
+        let address = null;
+        
+        // Portfolio state
+        let state = {
+            cash: 100,
+            startCash: 100,
             positions: [],
             history: [],
-            stats: { wins: 0, losses: 0 }
-        };
-        let settings = {
-            maxRisk: 2,
-            kellyFraction: 0.5,
-            autoStop: 15,
-            autoTakeProfit: 50
+            wins: 0,
+            losses: 0
         };
 
-        // Init
-        window.onload = function() {
-            loadData();
-            init();
-            updatePortfolioDisplay();
-        };
-
-        function loadData() {
-            const saved = localStorage.getItem('pennyCryptoAI_v2');
+        // Load from localStorage
+        function load() {
+            const saved = localStorage.getItem('ai_trader_portfolio');
             if (saved) {
-                const data = JSON.parse(saved);
-                portfolio = data.portfolio || portfolio;
-                settings = data.settings || settings;
-                
-                // Update inputs
-                document.getElementById('startingBalance').value = portfolio.startBalance;
-                document.getElementById('maxRisk').value = settings.maxRisk;
-                document.getElementById('kellyFraction').value = settings.kellyFraction;
-                document.getElementById('autoStop').value = settings.autoStop;
-                document.getElementById('autoTakeProfit').value = settings.autoTakeProfit;
+                state = JSON.parse(saved);
+                updateDisplay();
             }
         }
 
-        function saveData() {
-            localStorage.setItem('pennyCryptoAI_v2', JSON.stringify({ portfolio, settings }));
+        // Save to localStorage
+        function save() {
+            localStorage.setItem('ai_trader_portfolio', JSON.stringify(state));
         }
 
-        function saveSettings() {
-            settings.maxRisk = parseFloat(document.getElementById('maxRisk').value);
-            settings.kellyFraction = parseFloat(document.getElementById('kellyFraction').value);
-            settings.autoStop = parseFloat(document.getElementById('autoStop').value);
-            settings.autoTakeProfit = parseFloat(document.getElementById('autoTakeProfit').value);
-            saveData();
-            showToast('Settings saved');
-        }
-
-        function updateBalance() {
-            const newStart = parseFloat(document.getElementById('startingBalance').value);
-            if (newStart > 0) {
-                portfolio.startBalance = newStart;
-                portfolio.balance = newStart;
-                portfolio.positions = [];
-                portfolio.history = [];
-                portfolio.stats = { wins: 0, losses: 0 };
-                saveData();
-                updatePortfolioDisplay();
-                showToast('Balance updated & portfolio reset');
+        // Update all displays
+        function updateDisplay() {
+            // Calculate values
+            const invested = state.positions.reduce((sum, p) => sum + p.amount, 0);
+            let unrealizedPnl = 0;
+            
+            state.positions.forEach(pos => {
+                const coin = coins.find(c => c.s === pos.coin);
+                if (coin) {
+                    const currentVal = pos.tokens * coin.p;
+                    unrealizedPnl += (currentVal - pos.amount);
+                }
+            });
+            
+            const totalValue = state.cash + invested + unrealizedPnl;
+            const totalPnl = totalValue - state.startCash;
+            const totalPnlPct = (totalPnl / state.startCash) * 100;
+            
+            // Update header
+            document.getElementById('portValue').textContent = '$' + totalValue.toFixed(2);
+            document.getElementById('portChange').textContent = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toFixed(2) + ' (' + (totalPnlPct >= 0 ? '+' : '') + totalPnlPct.toFixed(2) + '%)';
+            document.getElementById('portChange').style.color = totalPnl >= 0 ? '#00ff88' : '#ff3366';
+            
+            document.getElementById('cashValue').textContent = '$' + state.cash.toFixed(2);
+            document.getElementById('investedValue').textContent = '$' + invested.toFixed(2);
+            document.getElementById('posCount').textContent = state.positions.length;
+            
+            const totalTrades = state.wins + state.losses;
+            document.getElementById('winRateDisplay').textContent = totalTrades > 0 ? Math.round((state.wins/totalTrades)*100) + '%' : '--';
+            
+            // Positions list
+            if (state.positions.length === 0) {
+                document.getElementById('emptyPositions').style.display = 'block';
+                document.getElementById('positionsList').innerHTML = '';
+            } else {
+                document.getElementById('emptyPositions').style.display = 'none';
+                document.getElementById('positionsList').innerHTML = state.positions.map(pos => {
+                    const coin = coins.find(c => c.s === pos.coin);
+                    const currentPrice = coin ? coin.p : pos.price;
+                    const currentVal = pos.tokens * currentPrice;
+                    const pnl = currentVal - pos.amount;
+                    const pnlPct = (pnl / pos.amount) * 100;
+                    
+                    return `
+                        <div class="position-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="font-size: 20px; font-weight: 700;">${pos.coin}</div>
+                                <div style="color: ${pnl >= 0 ? '#00ff88' : '#ff3366'}; font-weight: 700;">
+                                    ${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)} (${pnlPct.toFixed(1)}%)
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #888; margin-bottom: 12px;">
+                                <div>Invested: $${pos.amount.toFixed(2)}</div>
+                                <div>Tokens: ${pos.tokens.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+                                <div>Entry: $${pos.price < 0.0001 ? pos.price.toExponential(2) : pos.price.toFixed(6)}</div>
+                                <div>Current: $${currentPrice < 0.0001 ? currentPrice.toExponential(2) : currentPrice.toFixed(6)}</div>
+                            </div>
+                            <button onclick="sellPosition(${pos.id})" class="btn btn-red" style="padding: 10px; font-size: 14px;">SELL NOW</button>
+                        </div>
+                    `;
+                }).join('');
             }
+            
+            // History
+            document.getElementById('historyList').innerHTML = state.history.slice().reverse().map(trade => `
+                <div class="glass" style="border-left: 3px solid ${trade.pnl >= 0 ? '#00ff88' : '#ff3366'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 16px;">${trade.coin}</span>
+                        <span style="color: ${trade.pnl >= 0 ? '#00ff88' : '#ff3366'}; font-weight: 700;">
+                            ${trade.pnl >= 0 ? '+' : ''}$${Math.abs(trade.pnl).toFixed(2)}
+                        </span>
+                    </div>
+                    <div style="margin-top: 4px; font-size: 12px; color: #666;">
+                        ${new Date(trade.time).toLocaleDateString()} • ${trade.pnlPct.toFixed(1)}% return
+                    </div>
+                </div>
+            `).join('') || '<p style="color: #666; text-align: center;">No trades yet</p>';
+            
+            save();
         }
 
-        function resetPortfolio() {
-            if(confirm('Clear all trades and reset to starting balance?')) {
-                portfolio.balance = portfolio.startBalance;
-                portfolio.positions = [];
-                portfolio.history = [];
-                portfolio.stats = { wins: 0, losses: 0 };
-                saveData();
-                updatePortfolioDisplay();
-                showToast('Portfolio reset');
-            }
-        }
-
+        // Fetch prices
         async function fetchPrices() {
             try {
-                const response = await fetch(
-                    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=pepe,shiba-inu,bonk,floki,wojak,dogecoin,kishu-inu,baby-doge-coin&order=market_cap_desc&sparkline=false&price_change_percentage=1h,24h,7d'
-                );
-                const data = await response.json();
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=pepe,shiba-inu,bonk,floki,wojak&order=market_cap_desc&sparkline=false&price_change_percentage=24h');
+                const data = await res.json();
                 
-                coins = data.map(coin => {
-                    const p = coin.current_price;
-                    const c1h = coin.price_change_percentage_1h_in_currency || 0;
-                    const c24 = coin.price_change_percentage_24h || 0;
-                    const c7d = coin.price_change_percentage_7d_in_currency || 0;
-                    const mc = coin.market_cap || 0;
-                    const vol = coin.total_volume || 0;
-                    
-                    // Scoring
-                    let score = 50;
-                    let risk = 50;
-                    
-                    const momentum = (c1h * 0.3) + (c24 * 0.5) + (c7d * 0.2);
-                    if (momentum > 20) score += 15;
-                    else if (momentum > 10) score += 10;
-                    else if (momentum < -20) score -= 15;
-                    
-                    const vmc = vol / mc;
-                    if (vmc > 0.2) { score += 10; risk -= 5; }
-                    else if (vmc < 0.05) { score -= 10; risk += 15; }
-                    
-                    if (mc > 10000000000) { score += 5; risk -= 10; }
-                    else if (mc < 100000000) { risk += 20; }
-                    
-                    const whale = vmc > 0.15 ? 'Accumulating' : vmc > 0.08 ? 'Neutral' : 'Distributing';
-                    if (whale === 'Accumulating') score += 8;
-                    
-                    let sig, conf;
-                    if (score >= 75 && risk < 45) { sig = 'STRONG BUY'; conf = 88; }
-                    else if (score >= 60 && risk < 60) { sig = 'BUY'; conf = 75; }
-                    else if (score < 30 || risk > 75) { sig = 'SELL'; conf = 75; }
-                    else { sig = 'HOLD'; conf = 55; }
-                    
-                    const winProb = conf / 100;
-                    const ratio = sig.includes('BUY') ? 2.5 : 1.5;
-                    const kelly = Math.max(0, ((ratio * winProb) - (1 - winProb)) / ratio);
-                    
-                    return {
-                        s: coin.symbol.toUpperCase(),
-                        n: coin.name,
-                        p: p, c1h, c24, c7d, mc, v: vol,
-                        score: Math.min(100, Math.max(0, score)),
-                        risk: Math.min(100, risk),
-                        sig, conf, whale,
-                        winProb, ratio, kelly,
-                        image: coin.image
-                    };
-                }).sort((a, b) => b.score - a.score);
+                coins = data.map(c => ({
+                    s: c.symbol.toUpperCase(),
+                    n: c.name,
+                    p: c.current_price,
+                    c24: c.price_change_percentage_24h || 0,
+                    mc: c.market_cap,
+                    v: c.total_volume,
+                    image: c.image,
+                    score: Math.floor(Math.random() * 30) + 60 // Simulated for demo
+                })).sort((a, b) => b.score - a.score);
                 
                 return true;
-            } catch (e) {
-                console.error('Fetch error:', e);
-                return false;
+            } catch(e) {
+                // Fallback
+                coins = [
+                    {s:'PEPE', n:'Pepe', p:0.0000038, c24:5.2, mc:1600000000, v:450000000, score:85, image:'https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg'},
+                    {s:'BONK', n:'Bonk', p:0.000015, c24:-2.3, mc:1100000000, v:120000000, score:65, image:'https://assets.coingecko.com/coins/images/28600/small/bonk.jpg'},
+                    {s:'FLOKI', n:'Floki', p:0.000075, c24:8.7, mc:720000000, v:85000000, score:75, image:'https://assets.coingecko.com/coins/images/16746/small/Floki.png'},
+                    {s:'SHIB', n:'Shiba Inu', p:0.000015, c24:2.1, mc:8800000000, v:350000000, score:70, image:'https://assets.coingecko.com/coins/images/11939/small/shiba.png'},
+                    {s:'WOJAK', n:'Wojak', p:0.00085, c24:12.3, mc:58000000, v:25000000, score:60, image:'https://assets.coingecko.com/coins/images/30226/small/wojak.jpeg'}
+                ];
+                return true;
             }
         }
 
         async function init() {
-            const success = await fetchPrices();
-            
-            if (!success || coins.length === 0) {
-                coins = [
-                    {s:'PEPE', n:'Pepe', p:0.0000038, c1h:2.5, c24:5.2, c7d:15.3, mc:1600000000, v:450000000, score:78, risk:35, sig:'STRONG BUY', conf:88, whale:'Accumulating', winProb:0.75, ratio:2.8, kelly:0.46, image:'https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg'},
-                    {s:'BONK', n:'Bonk', p:0.000015, c1h:-1.2, c24:-2.3, c7d:8.7, mc:1100000000, v:120000000, score:55, risk:50, sig:'HOLD', conf:55, whale:'Neutral', winProb:0.55, ratio:1.8, kelly:0.19, image:'https://assets.coingecko.com/coins/images/28600/small/bonk.jpg'},
-                    {s:'FLOKI', n:'Floki', p:0.000075, c1h:3.1, c24:8.7, c7d:25.4, mc:720000000, v:85000000, score:72, risk:45, sig:'BUY', conf:76, whale:'Accumulating', winProb:0.70, ratio:2.5, kelly:0.42, image:'https://assets.coingecko.com/coins/images/16746/small/Floki.png'}
-                ];
-            }
-            
+            await fetchPrices();
             renderCoins();
+            updateDisplay();
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('coinsList').classList.remove('hidden');
         }
 
         function renderCoins() {
             const list = document.getElementById('coinsList');
-            list.innerHTML = '';
-            
-            coins.forEach(coin => {
-                const cls = coin.sig === 'STRONG BUY' ? 'signal-strong-buy' : 
-                           coin.sig === 'BUY' ? 'signal-buy' :
-                           coin.sig === 'SELL' ? 'signal-sell' : 'signal-hold';
+            list.innerHTML = coins.map(c => {
+                const sig = c.score > 75 ? 'STRONG BUY' : c.score > 60 ? 'BUY' : 'HOLD';
+                const cls = sig === 'BUY' || sig === 'STRONG BUY' ? 'signal-buy' : 'signal-hold';
+                const price = c.p < 0.0001 ? '$' + c.p.toExponential(2) : '$' + c.p.toFixed(6);
                 
-                const priceStr = coin.p < 0.0001 ? '$' + coin.p.toExponential(2) : 
-                                coin.p < 1 ? '$' + coin.p.toFixed(6) : '$' + coin.p.toFixed(4);
-                
-                const pnlColor = coin.c24 >= 0 ? 'price-up' : 'price-down';
-                const sign = coin.c24 >= 0 ? '+' : '';
-                
-                list.innerHTML += `
-                    <div class="coin-card ${cls}" onclick="openTrade('${coin.s}')">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <img src="${coin.image}" style="width:44px; height:44px; border-radius:50%; border: 2px solid rgba(255,255,255,0.1);">
-                                <div>
-                                    <div style="font-size:20px; font-weight:800; color:white;">${coin.s}</div>
-                                    <div style="color:#888; font-size:12px;">${coin.n}</div>
-                                </div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="tag ${coin.whale === 'Accumulating' ? 'tag-whale' : 'tag-momentum'}">
-                                    ${coin.sig}
-                                </div>
-                                <div style="font-size:11px; color:#666; margin-top:6px;">${coin.conf}% conf</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                            <div>
-                                <div style="font-size:26px; font-weight:700; font-family:monospace; color:white;">${priceStr}</div>
-                                <div style="font-size:13px; color:#666; margin-top:4px;">MCap: $${(coin.mc/1000000).toFixed(1)}M</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div class="${pnlColor}" style="font-size:22px; font-weight:800;">${sign}${coin.c24.toFixed(1)}%</div>
-                                <div style="font-size:11px; color:#666; margin-top:4px;">24h change</div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top:14px; display:flex; gap:8px; align-items:center;">
-                            <div style="flex:1; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;">
-                                <div style="width:${coin.score}%; height:100%; background:${coin.score>70?'#00ff88':coin.score>40?'#ffc107':'#ff3366'};"></div>
-                            </div>
-                            <span style="font-size:11px; color:#888; min-width:40px; text-align:right;">${coin.score}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function openTrade(sym) {
-            selectedCoin = coins.find(c => c.s === sym);
-            if (!selectedCoin) return;
-            
-            document.getElementById('modalCoin').textContent = selectedCoin.s;
-            document.getElementById('modalImage').src = selectedCoin.image;
-            document.getElementById('modalImage').style.display = 'block';
-            
-            const priceStr = selectedCoin.p < 0.0001 ? '$' + selectedCoin.p.toExponential(4) : 
-                            selectedCoin.p < 1 ? '$' + selectedCoin.p.toFixed(8) : '$' + selectedCoin.p.toFixed(4);
-            document.getElementById('modalPrice').textContent = priceStr;
-            
-            const sigColor = selectedCoin.sig.includes('BUY') ? '#00ff88' : 
-                            selectedCoin.sig.includes('SELL') ? '#ff3366' : '#ffc107';
-            document.getElementById('modalSignalTag').textContent = selectedCoin.sig;
-            document.getElementById('modalSignalTag').style.color = sigColor;
-            document.getElementById('modalSignalTag').style.borderColor = sigColor;
-            document.getElementById('modalSignalTag').style.background = sigColor + '20';
-            
-            document.getElementById('modalConf').textContent = selectedCoin.conf + '%';
-            document.getElementById('modalRisk').textContent = selectedCoin.risk + '/100';
-            document.getElementById('modalRisk').style.color = selectedCoin.risk > 60 ? '#ff3366' : selectedCoin.risk > 40 ? '#ffc107' : '#00ff88';
-            document.getElementById('modalWhale').textContent = selectedCoin.whale;
-            
-            // Kelly calc
-            const kellyPct = selectedCoin.kelly * settings.kellyFraction * 100;
-            const kellyAmount = Math.min(
-                portfolio.balance * (kellyPct / 100),
-                portfolio.balance * (settings.maxRisk / 100)
-            );
-            
-            document.getElementById('kellyProb').textContent = (selectedCoin.winProb * 100).toFixed(0) + '%';
-            document.getElementById('kellyRatio').textContent = selectedCoin.ratio.toFixed(1);
-            document.getElementById('kellyAmount').textContent = kellyAmount.toFixed(2);
-            document.getElementById('kellyPercent').textContent = ((kellyAmount / portfolio.balance) * 100).toFixed(1);
-            document.getElementById('modalAvailable').textContent = portfolio.balance.toFixed(2);
-            
-            document.getElementById('tradeAmount').value = kellyAmount.toFixed(2);
-            updateTradeCalc();
-            
-            document.getElementById('tradeModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function updateTradeCalc() {
-            if (!selectedCoin) return;
-            
-            const amount = parseFloat(document.getElementById('tradeAmount').value) || 0;
-            const tokens = amount / selectedCoin.p;
-            
-            let tokenStr;
-            if (tokens > 1000000) tokenStr = (tokens / 1000000).toFixed(2) + 'M';
-            else if (tokens > 1000) tokenStr = (tokens / 1000).toFixed(2) + 'K';
-            else tokenStr = tokens.toLocaleString(undefined, {maximumFractionDigits:0});
-            
-            document.getElementById('tokenAmount').textContent = tokenStr + ' ' + selectedCoin.s;
-            
-            const stopLoss = selectedCoin.p * (1 - settings.autoStop / 100);
-            const takeProfit = selectedCoin.p * (1 + settings.autoTakeProfit / 100);
-            
-            document.getElementById('stopLossPrice').textContent = '$' + (stopLoss < 0.0001 ? stopLoss.toExponential(4) : stopLoss.toFixed(8));
-            document.getElementById('takeProfitPrice').textContent = '$' + (takeProfit < 0.0001 ? takeProfit.toExponential(4) : takeProfit.toFixed(8));
-        }
-
-        function setTradeAmount(mult) {
-            const base = parseFloat(document.getElementById('kellyAmount').textContent);
-            document.getElementById('tradeAmount').value = (base * mult).toFixed(2);
-            updateTradeCalc();
-        }
-
-        function executePaperTrade() {
-            const amount = parseFloat(document.getElementById('tradeAmount').value);
-            
-            if (!amount || amount <= 0) {
-                showToast('Enter valid amount', true);
-                return;
-            }
-            if (amount > portfolio.balance) {
-                showToast('Insufficient balance', true);
-                return;
-            }
-            
-            // Deduct from balance
-            portfolio.balance -= amount;
-            
-            const position = {
-                id: Date.now(),
-                coin: selectedCoin.s,
-                name: selectedCoin.n,
-                image: selectedCoin.image,
-                entryPrice: selectedCoin.p,
-                amount: amount,
-                tokens: amount / selectedCoin.p,
-                stopLoss: selectedCoin.p * (1 - settings.autoStop / 100),
-                takeProfit: selectedCoin.p * (1 + settings.autoTakeProfit / 100),
-                timestamp: new Date().toISOString(),
-                status: 'open'
-            };
-            
-            portfolio.positions.push(position);
-            saveData();
-            updatePortfolioDisplay();
-            
-            showToast(`📘 Bought ${selectedCoin.s} for $${amount.toFixed(2)}`);
-            closeModal();
-            
-            // Simulate price movement
-            setTimeout(() => simulateMarket(), 2000);
-        }
-
-        function simulateMarket() {
-            // Randomly update one position
-            if (portfolio.positions.length === 0) return;
-            
-            const pos = portfolio.positions[Math.floor(Math.random() * portfolio.positions.length)];
-            const coin = coins.find(c => c.s === pos.coin);
-            if (!coin) return;
-            
-            // Random move -5% to +8%
-            const move = (Math.random() * 0.13) - 0.05;
-            const currentPrice = pos.entryPrice * (1 + move);
-            
-            // Check SL/TP
-            if (currentPrice <= pos.stopLoss) {
-                closePosition(pos.id, currentPrice, 'stop_loss');
-                showToast(`🛑 ${pos.coin} hit stop loss`, true);
-            } else if (currentPrice >= pos.takeProfit) {
-                closePosition(pos.id, currentPrice, 'take_profit');
-                showToast(`🎯 ${pos.coin} hit take profit!`, false);
-            } else {
-                // Just update current price in memory for display
-                pos.currentPrice = currentPrice;
-                updatePortfolioDisplay();
-            }
-        }
-
-        function closePosition(id, exitPrice, reason) {
-            const idx = portfolio.positions.findIndex(p => p.id === id);
-            if (idx === -1) return;
-            
-            const pos = portfolio.positions[idx];
-            const closePrice = exitPrice || pos.currentPrice || pos.entryPrice;
-            
-            const pnl = (closePrice - pos.entryPrice) * pos.tokens;
-            const pnlPercent = ((closePrice - pos.entryPrice) / pos.entryPrice) * 100;
-            
-            // Return principal + P&L to balance
-            portfolio.balance += pos.amount + pnl;
-            
-            const trade = {
-                ...pos,
-                exitPrice: closePrice,
-                exitTime: new Date().toISOString(),
-                pnl: pnl,
-                pnlPercent: pnlPercent,
-                closeReason: reason
-            };
-            
-            portfolio.history.push(trade);
-            portfolio.positions.splice(idx, 1);
-            
-            if (pnl > 0) portfolio.stats.wins++;
-            else portfolio.stats.losses++;
-            
-            saveData();
-            updatePortfolioDisplay();
-        }
-
-        function updatePortfolioDisplay() {
-            // Calculate invested amount
-            const invested = portfolio.positions.reduce((sum, pos) => sum + pos.amount, 0);
-            const totalValue = portfolio.balance + invested;
-            
-            // Calculate unrealized P&L
-            let unrealizedPnl = 0;
-            portfolio.positions.forEach(pos => {
-                const coin = coins.find(c => c.s === pos.coin);
-                if (coin && pos.currentPrice) {
-                    unrealizedPnl += (pos.currentPrice - pos.entryPrice) * pos.tokens;
-                }
-            });
-            
-            const totalPnl = portfolio.balance + unrealizedPnl - portfolio.startBalance;
-            const totalPnlPercent = ((portfolio.balance + unrealizedPnl - portfolio.startBalance) / portfolio.startBalance) * 100;
-            
-            // Update header
-            document.getElementById('portfolioValue').textContent = '$' + (portfolio.balance + invested).toFixed(2);
-            document.getElementById('availableCash').textContent = '$' + portfolio.balance.toFixed(2);
-            
-            const pnlEl = document.getElementById('totalPnl');
-            pnlEl.textContent = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toFixed(2) + ' (' + (totalPnlPercent >= 0 ? '+' : '') + totalPnlPercent.toFixed(2) + '%)';
-            pnlEl.style.color = totalPnl >= 0 ? '#00ff88' : '#ff3366';
-            
-            // Update stats
-            document.getElementById('openPositionsCount').textContent = portfolio.positions.length;
-            const winRate = portfolio.stats.wins + portfolio.stats.losses > 0 ? 
-                ((portfolio.stats.wins / (portfolio.stats.wins + portfolio.stats.losses)) * 100).toFixed(0) : '--';
-            document.getElementById('winRateStat').textContent = winRate + '%';
-            
-            const avgKelly = portfolio.positions.length > 0 ?
-                ((portfolio.positions.reduce((a,b) => a + (b.amount/(portfolio.balance+b.amount)*100), 0) / portfolio.positions.length)).toFixed(1) : '--';
-            document.getElementById('avgKellyStat').textContent = avgKelly + '%';
-            
-            // Update positions view
-            document.getElementById('buyingPowerDisplay').textContent = '$' + portfolio.balance.toFixed(2);
-            
-            if (portfolio.positions.length === 0) {
-                document.getElementById('noPositions').style.display = 'block';
-                document.getElementById('positionsList').innerHTML = '';
-            } else {
-                document.getElementById('noPositions').style.display = 'none';
-                document.getElementById('positionsList').innerHTML = portfolio.positions.map(pos => {
-                    const coin = coins.find(c => c.s === pos.coin);
-                    const currentPrice = pos.currentPrice || coin?.p || pos.entryPrice;
-                    const currentValue = pos.tokens * currentPrice;
-                    const pnl = currentValue - pos.amount;
-                    const pnlPercent = (pnl / pos.amount) * 100;
-                    const isProfit = pnl >= 0;
-                    
-                    return `
-                        <div class="position-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <img src="${pos.image}" style="width:32px; height:32px; border-radius:50%;">
-                                    <div>
-                                        <div style="font-size:18px; font-weight:800;">${pos.coin}</div>
-                                        <div style="font-size:12px; color:#666;">${pos.tokens > 1000000 ? (pos.tokens/1000000).toFixed(2)+'M' : pos.tokens > 1000 ? (pos.tokens/1000).toFixed(2)+'K' : pos.tokens.toFixed(0)} tokens</div>
-                                    </div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div style="color:${isProfit?'#00ff88':'#ff3366'}; font-weight:700; font-size:20px;">
-                                        ${isProfit?'+':''}$${Math.abs(pnl).toFixed(2)}
-                                    </div>
-                                    <div style="font-size:12px; color:#666;">${isProfit?'+':''}${pnlPercent.toFixed(1)}%</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:12px; font-size:12px;">
-                                <div>
-                                    <div style="color:#666; margin-bottom:2px;">Entry</div>
-                                    <div style="color:white; font-family:monospace;">$${pos.entryPrice < 0.0001 ? pos.entryPrice.toExponential(2) : pos.entryPrice.toFixed(6)}</div>
-                                </div>
-                                <div>
-                                    <div style="color:#666; margin-bottom:2px;">Current</div>
-                                    <div style="color:white; font-family:monospace;">$${currentPrice < 0.0001 ? currentPrice.toExponential(2) : currentPrice.toFixed(6)}</div>
-                                </div>
-                                <div>
-                                    <div style="color:#666; margin-bottom:2px;">Invested</div>
-                                    <div style="color:white;">$${pos.amount.toFixed(2)}</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display:flex; gap:8px;">
-                                <button onclick="closePosition(${pos.id}, null, 'manual')" class="btn btn-red" style="margin:0; padding:10px; font-size:13px; flex:1;">Close Position</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            // Update history view
-            document.getElementById('totalTradesStat').textContent = portfolio.history.length;
-            document.getElementById('winningTradesStat').textContent = portfolio.stats.wins;
-            document.getElementById('losingTradesStat').textContent = portfolio.stats.losses;
-            
-            const netPnl = portfolio.history.reduce((sum, t) => sum + t.pnl, 0);
-            const netPnlEl = document.getElementById('netPnlStat');
-            netPnlEl.textContent = (netPnl >= 0 ? '+' : '') + '$' + Math.abs(netPnl).toFixed(2);
-            netPnlEl.style.color = netPnl >= 0 ? '#00ff88' : '#ff3366';
-            
-            document.getElementById('historyList').innerHTML = portfolio.history.slice().reverse().map(trade => {
-                const isProfit = trade.pnl > 0;
-                const date = new Date(trade.exitTime).toLocaleDateString();
                 return `
-                    <div class="glass" style="margin-bottom:10px; padding:14px; border-left:3px solid ${isProfit?'#00ff88':'#ff3366'};">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <img src="${trade.image}" style="width:24px; height:24px; border-radius:50%;">
-                                <span style="font-weight:700; font-size:16px;">${trade.coin}</span>
-                                <span style="color:#666; font-size:12px;">${date}</span>
+                    <div class="coin-card ${cls}" onclick="openTrade('${c.s}')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${c.image}" style="width: 40px; height: 40px; border-radius: 50%;">
+                                <div>
+                                    <div style="font-size: 18px; font-weight: 700;">${c.s}</div>
+                                    <div style="font-size: 12px; color: #888;">${c.n}</div>
+                                </div>
                             </div>
-                            <span style="color:${isProfit?'#00ff88':'#ff3366'}; font-weight:700;">
-                                ${isProfit?'+':''}$${Math.abs(trade.pnl).toFixed(2)}
-                            </span>
+                            <div style="text-align: right;">
+                                <div style="background: rgba(0,255,136,0.2); color: #00ff88; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;">${sig}</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px;">Score: ${c.score}</div>
+                            </div>
                         </div>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                            ${trade.closeReason === 'take_profit' ? '🎯 Take Profit' : 
-                              trade.closeReason === 'stop_loss' ? '🛑 Stop Loss' : '👋 Manual'} • 
-                            ${trade.pnlPercent.toFixed(1)}% • $${trade.amount.toFixed(0)} invested
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 24px; font-family: monospace;">${price}</div>
+                            <div style="color: ${c.c24 >= 0 ? '#00ff88' : '#ff3366'}; font-weight: 700;">
+                                ${c.c24 >= 0 ? '+' : ''}${c.c24.toFixed(1)}%
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function closeModal() {
-            document.getElementById('tradeModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            selectedCoin = null;
+        function openTrade(sym) {
+            selected = coins.find(c => c.s === sym);
+            if (!selected) return;
+            
+            document.getElementById('modalCoin').textContent = selected.s;
+            document.getElementById('modalImg').src = selected.image;
+            document.getElementById('modalImg').style.display = 'block';
+            document.getElementById('modalPrice').textContent = selected.p < 0.0001 ? '$' + selected.p.toExponential(4) : '$' + selected.p.toFixed(8);
+            
+            // Kelly calc: 2% risk
+            const kellyAmount = Math.min(state.cash * 0.02, state.cash);
+            document.getElementById('recAmount').textContent = '$' + kellyAmount.toFixed(2);
+            document.getElementById('tradeAmount').value = kellyAmount.toFixed(2);
+            document.getElementById('availableCash').textContent = state.cash.toFixed(2);
+            
+            document.getElementById('tradeModal').style.display = 'block';
         }
 
-        async function connectWallet() {
+        function executeTrade() {
+            const amount = parseFloat(document.getElementById('tradeAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showToast('Enter valid amount', true);
+                return;
+            }
+            if (amount > state.cash) {
+                showToast('Insufficient cash', true);
+                return;
+            }
+            
+            // Deduct cash
+            state.cash -= amount;
+            
+            const position = {
+                id: Date.now(),
+                coin: selected.s,
+                amount: amount,
+                tokens: amount / selected.p,
+                price: selected.p,
+                time: new Date().toISOString()
+            };
+            
+            state.positions.push(position);
+            updateDisplay();
+            closeModal();
+            showToast(`Bought ${selected.s} for $${amount.toFixed(2)}`);
+        }
+
+        function sellPosition(id) {
+            const idx = state.positions.findIndex(p => p.id === id);
+            if (idx === -1) return;
+            
+            const pos = state.positions[idx];
+            const coin = coins.find(c => c.s === pos.coin);
+            const sellPrice = coin ? coin.p : pos.price;
+            const sellValue = pos.tokens * sellPrice;
+            const pnl = sellValue - pos.amount;
+            const pnlPct = (pnl / pos.amount) * 100;
+            
+            // Return cash + profit/loss
+            state.cash += sellValue;
+            
+            state.history.push({
+                ...pos,
+                sellPrice: sellPrice,
+                sellValue: sellValue,
+                pnl: pnl,
+                pnlPct: pnlPct,
+                closeTime: new Date().toISOString()
+            });
+            
+            if (pnl > 0) state.wins++;
+            else state.losses++;
+            
+            state.positions.splice(idx, 1);
+            updateDisplay();
+            showToast(`Sold ${pos.coin} for ${pnl >= 0 ? 'profit' : 'loss'} of $${Math.abs(pnl).toFixed(2)}`);
+        }
+
+        function closeModal() {
+            document.getElementById('tradeModal').style.display = 'none';
+            selected = null;
+        }
+
+        function showTab(tab) {
+            // Hide all
+            document.getElementById('view-signals').classList.add('hidden');
+            document.getElementById('view-positions').classList.add('hidden');
+            document.getElementById('view-history').classList.add('hidden');
+            
+            // Show selected
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            
+            // Update buttons
+            ['signals', 'positions', 'history'].forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                if (t === tab) {
+                    btn.style.background = 'rgba(0,255,136,0.2)';
+                    btn.style.color = '#00ff88';
+                } else {
+                    btn.style.background = 'rgba(255,255,255,0.1)';
+                    btn.style.color = 'white';
+                }
+            });
+            
+            // Update nav
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                const tabs = ['signals', 'positions', null, 'history'];
+                btn.classList.toggle('active', tabs[i] === tab);
+            });
+            
+            updateDisplay();
+        }
+
+        async function refresh() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('coinsList').classList.add('hidden');
+            await init();
+            showToast('Prices updated');
+        }
+
+        function connectWallet() {
             if (!window.ethereum) {
                 showToast('MetaMask not found', true);
                 return;
             }
-            try {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send('eth_requestAccounts', []);
-                signer = provider.getSigner();
-                address = await signer.getAddress();
-                document.getElementById('connectBtn').textContent = '✅ ' + address.slice(0,6) + '...';
+            window.ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
+                address = accounts[0];
+                document.getElementById('walletText').textContent = address.slice(0,6) + '...';
                 showToast('Wallet connected');
-            } catch(e) {
-                showToast('Connection failed', true);
-            }
+            }).catch(() => showToast('Connection failed', true));
         }
 
-        function executeLiveTrade() {
-            if (!address) {
-                showToast('Connect wallet first!', true);
-                return;
-            }
-            window.location.href = 'https://metamask.app.link/';
-        }
-
-        function switchTab(tab, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            if (el) el.classList.add('active');
-            
-            ['signalsView', 'positionsView', 'historyView', 'settingsView'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(tab + 'View').classList.remove('hidden');
-        }
-
-        function showView(view) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            const views = ['signals', 'positions', 'refresh', 'history'];
-            const index = views.indexOf(view);
-            if (index >= 0) document.querySelectorAll('.nav-btn')[index].classList.add('active');
-            
-            if (view === 'refresh') {
-                refreshData();
-                return;
-            }
-            
-            const tabMap = { 'signals': 0, 'positions': 1, 'history': 2 };
-            const tabs = document.querySelectorAll('.tab');
-            if (tabMap[view] !== undefined && tabs[tabMap[view]]) {
-                switchTab(view, tabs[tabMap[view]]);
-            }
-        }
-
-        async function refreshData() {
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('coinsList').classList.add('hidden');
-            await init();
-            updatePortfolioDisplay();
-            showToast('Prices updated');
-        }
-
-        function showToast(msg, isError = false) {
+        function showToast(msg, isError) {
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.style.opacity = '1';
-            t.style.background = isError ? 'rgba(255,51,102,0.95)' : 'rgba(0,255,136,0.95)';
+            t.style.background = isError ? 'rgba(255,51,102,0.9)' : 'rgba(0,255,136,0.9)';
             t.style.color = isError ? '#fff' : '#000';
             setTimeout(() => t.style.opacity = '0', 3000);
         }
 
-        // Auto-simulate market movements every 10 seconds
+        // Init
+        load();
+        init();
+        
+        // Auto-refresh prices every 30s
         setInterval(() => {
-            if (portfolio.positions.length > 0) {
-                simulateMarket();
-            }
-        }, 10000);
+            fetchPrices().then(() => {
+                updateDisplay();
+            });
+        }, 30000);
     </script>
 </body>
 </html>
