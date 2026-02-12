@@ -254,158 +254,282 @@
         .trend-up { background: rgba(0,255,136,0.2); color: #00ff88; }
         .trend-down { background: rgba(255,51,102,0.2); color: #ff3366; }
         .trend-sideways { background: rgba(255,193,7,0.2); color: #ffc107; }
+
+        /* Wallet Setup Screen */
+        #wallet-setup {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0a0a0f;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .setup-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .setup-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00ff88, #0088ff);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+            box-shadow: 0 10px 40px rgba(0,255,136,0.3);
+        }
+        .wallet-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 16px;
+            color: #fff;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .wallet-input:focus {
+            border-color: #00ff88;
+        }
+        .connect-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .connect-btn:active {
+            transform: scale(0.98);
+        }
+        .connect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .demo-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #666;
+            margin-top: 12px;
+        }
+        .wallet-display {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .wallet-display:hover {
+            opacity: 0.8;
+        }
+        .change-wallet-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div class="p-4 max-w-md mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-[#00ff88]">AI Trader Pro</h1>
-                <p class="text-xs text-gray-500" id="last-update">Loading...</p>
-            </div>
-            <div class="bg-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 cursor-pointer" onclick="copyAddress()">
-                <span class="text-lg">🦊</span>
-                <span class="text-xs font-mono" id="addr-short">0x7329...</span>
-            </div>
+    <!-- Wallet Setup Screen -->
+    <div id="wallet-setup">
+        <div class="setup-container">
+            <div class="setup-logo">📊</div>
+            <h1 class="text-3xl font-bold mb-2">AI Trader Pro</h1>
+            <p class="text-gray-500 mb-8">Connect your wallet to get AI-powered trading signals</p>
+            
+            <input type="text" 
+                   class="wallet-input" 
+                   id="wallet-input" 
+                   placeholder="Enter wallet address (0x...)"
+                   autocomplete="off">
+            
+            <button class="connect-btn" id="connect-btn" onclick="connectWallet()">
+                Connect Wallet
+            </button>
+            
+            <button class="connect-btn demo-btn" onclick="useDemoWallet()">
+                Use Demo Wallet
+            </button>
+            
+            <p class="text-xs text-gray-600 mt-6">
+                Supports Ethereum and Base chain wallets.<br>
+                Your wallet address is only stored locally.
+            </p>
         </div>
+    </div>
 
-        <!-- Portfolio Summary -->
-        <div class="glass mb-6" id="portfolio-summary">
-            <div class="flex justify-between items-start mb-4">
+    <!-- Main App (Hidden until wallet connected) -->
+    <div id="main-app" class="hidden">
+        <div class="p-4 max-w-md mx-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
                 <div>
-                    <p class="text-[10px] uppercase tracking-wider text-[#00ff88] font-bold mb-1">Portfolio Value</p>
-                    <h2 class="text-3xl font-bold" id="total-value">--</h2>
-                    <p class="text-sm text-gray-500" id="total-change">Loading portfolio...</p>
+                    <h1 class="text-2xl font-bold text-[#00ff88]">AI Trader Pro</h1>
+                    <p class="text-xs text-gray-500" id="last-update">Loading...</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-[10px] text-gray-400 uppercase mb-1">Holdings</p>
-                    <p class="text-lg font-bold" id="holding-count">--</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
-                <div class="text-center">
-                    <p class="text-[10px] text-gray-500 uppercase mb-1">Tokens</p>
-                    <p class="font-bold" id="token-count">--</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-[10px] text-gray-500 uppercase mb-1">Best 24h</p>
-                    <p class="font-bold text-[#00ff88]" id="best-performer">--</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-[10px] text-gray-500 uppercase mb-1">Chains</p>
-                    <p class="font-bold" id="chain-count">--</p>
+                <div class="bg-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 wallet-display" onclick="copyAddress()">
+                    <span class="text-lg">🦊</span>
+                    <span class="text-xs font-mono" id="addr-short">0x...</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab Buttons -->
-        <div class="flex gap-2 mb-4">
-            <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-signals" onclick="showView('signals')" style="background: rgba(0,255,136,0.2); color: #00ff88;">Signals</button>
-            <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-portfolio" onclick="showView('portfolio')" style="background: rgba(255,255,255,0.1); color: white;">Portfolio</button>
-            <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-discover" onclick="showView('discover')" style="background: rgba(255,255,255,0.1); color: white;">Discover</button>
-            <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-advisor" onclick="showView('advisor')" style="background: rgba(255,255,255,0.1); color: white;">Advisor</button>
-        </div>
-
-        <!-- Loading -->
-        <div id="loading" class="text-center py-10">
-            <div class="spinner"></div>
-            <p class="text-gray-500 mt-3 text-sm">Scanning wallet & fetching prices...</p>
-        </div>
-
-        <!-- Signals View -->
-        <div id="signals-view" class="hidden">
-            <div id="signals-list" class="space-y-3"></div>
-        </div>
-
-        <!-- Portfolio View -->
-        <div id="portfolio-view" class="hidden">
-            <div id="portfolio-list" class="space-y-3"></div>
-        </div>
-
-        <!-- Discover View -->
-        <div id="discover-view" class="hidden">
-            <p class="text-xs text-gray-500 mb-3">Trending tokens with AI buy/sell signals based on momentum, volume, and market data.</p>
-            <div id="discover-list" class="space-y-3"></div>
-        </div>
-
-        <!-- AI Advisor View -->
-        <div id="advisor-view" class="hidden">
-            <div class="glass mb-4">
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="ai-avatar">📊</div>
+            <!-- Portfolio Summary -->
+            <div class="glass mb-6" id="portfolio-summary">
+                <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h3 class="font-bold text-lg">AI Chart Analyst</h3>
-                        <p class="text-xs text-gray-500">Technical analysis: trends, support/resistance, momentum</p>
+                        <p class="text-[10px] uppercase tracking-wider text-[#00ff88] font-bold mb-1">Portfolio Value</p>
+                        <h2 class="text-3xl font-bold" id="total-value">--</h2>
+                        <p class="text-sm text-gray-500" id="total-change">Loading portfolio...</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-400 uppercase mb-1">Holdings</p>
+                        <p class="text-lg font-bold" id="holding-count">--</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+                    <div class="text-center">
+                        <p class="text-[10px] text-gray-500 uppercase mb-1">Tokens</p>
+                        <p class="font-bold" id="token-count">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-gray-500 uppercase mb-1">Best 24h</p>
+                        <p class="font-bold text-[#00ff88]" id="best-performer">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-gray-500 uppercase mb-1">Chains</p>
+                        <p class="font-bold" id="chain-count">--</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="quick-questions" id="quick-questions">
-                <button class="quick-q" onclick="askQuick('Technical analysis of PEPE')">📈 PEPE Chart</button>
-                <button class="quick-q" onclick="askQuick('Is the trend bullish or bearish?')">Trend Check</button>
-                <button class="quick-q" onclick="askQuick('Support and resistance levels')">Key Levels</button>
-                <button class="quick-q" onclick="askQuick('Should I buy the dip?')">Buy the dip?</button>
+
+            <!-- Tab Buttons -->
+            <div class="flex gap-2 mb-4">
+                <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-signals" onclick="showView('signals')" style="background: rgba(0,255,136,0.2); color: #00ff88;">Signals</button>
+                <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-portfolio" onclick="showView('portfolio')" style="background: rgba(255,255,255,0.1); color: white;">Portfolio</button>
+                <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-discover" onclick="showView('discover')" style="background: rgba(255,255,255,0.1); color: white;">Discover</button>
+                <button class="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all" id="tab-advisor" onclick="showView('advisor')" style="background: rgba(255,255,255,0.1); color: white;">Advisor</button>
             </div>
 
-            <div class="chat-container" id="chat-container">
-                <div class="message ai-message">
-                    <strong>Chart Analysis Ready 📊</strong><br><br>
-                    I now analyze actual price charts instead of just 24h changes. I look at:<br>
-                    • <strong>Trend Direction</strong> (Higher highs vs lower lows)<br>
-                    • <strong>Moving Averages</strong> (7d vs 30d trends)<br>
-                    • <strong>Momentum</strong> (RSI overbought/oversold)<br>
-                    • <strong>Volatility</strong> (Price swings and patterns)<br><br>
-                    Ask me about any coin's chart or technical outlook!
+            <!-- Loading -->
+            <div id="loading" class="text-center py-10">
+                <div class="spinner"></div>
+                <p class="text-gray-500 mt-3 text-sm">Scanning wallet & fetching prices...</p>
+            </div>
+
+            <!-- Signals View -->
+            <div id="signals-view" class="hidden">
+                <div id="signals-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Portfolio View -->
+            <div id="portfolio-view" class="hidden">
+                <div id="portfolio-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Discover View -->
+            <div id="discover-view" class="hidden">
+                <p class="text-xs text-gray-500 mb-3">Trending tokens with AI buy/sell signals based on momentum, volume, and market data.</p>
+                <div id="discover-list" class="space-y-3"></div>
+            </div>
+
+            <!-- AI Advisor View -->
+            <div id="advisor-view" class="hidden">
+                <div class="glass mb-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="ai-avatar">📊</div>
+                        <div>
+                            <h3 class="font-bold text-lg">AI Chart Analyst</h3>
+                            <p class="text-xs text-gray-500">Technical analysis: trends, support/resistance, momentum</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quick-questions" id="quick-questions">
+                    <button class="quick-q" onclick="askQuick('Technical analysis of PEPE')">📈 PEPE Chart</button>
+                    <button class="quick-q" onclick="askQuick('Is the trend bullish or bearish?')">Trend Check</button>
+                    <button class="quick-q" onclick="askQuick('Support and resistance levels')">Key Levels</button>
+                    <button class="quick-q" onclick="askQuick('Should I buy the dip?')">Buy the dip?</button>
+                </div>
+
+                <div class="chat-container" id="chat-container">
+                    <div class="message ai-message">
+                        <strong>Chart Analysis Ready 📊</strong><br><br>
+                        I now analyze actual price charts instead of just 24h changes. I look at:<br>
+                        • <strong>Trend Direction</strong> (Higher highs vs lower lows)<br>
+                        • <strong>Moving Averages</strong> (7d vs 30d trends)<br>
+                        • <strong>Momentum</strong> (RSI overbought/oversold)<br>
+                        • <strong>Volatility</strong> (Price swings and patterns)<br><br>
+                        Ask me about any coin's chart or technical outlook!
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Chat Input (Only for Advisor view) -->
-    <div class="chat-input-container hidden" id="chat-input-container">
-        <div class="chat-input-wrapper">
-            <input type="text" class="chat-input" id="chat-input" placeholder="Ask about chart analysis..." onkeypress="handleChatKey(event)">
-            <button class="send-btn" onclick="sendMessage()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
+        <!-- Chat Input (Only for Advisor view) -->
+        <div class="chat-input-container hidden" id="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about chart analysis..." onkeypress="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
         </div>
-    </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <button class="nav-btn active" id="nav-signals" onclick="showView('signals')">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            Signals
-        </button>
-        <button class="nav-btn" id="nav-portfolio" onclick="showView('portfolio')">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            Portfolio
-        </button>
-        <button class="nav-btn" id="nav-refresh" onclick="refreshAll()">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            Refresh
-        </button>
-        <button class="nav-btn" id="nav-discover" onclick="showView('discover')">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            Discover
-        </button>
-        <button class="nav-btn" id="nav-advisor" onclick="showView('advisor')">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-            Advisor
-        </button>
-    </nav>
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" id="nav-signals" onclick="showView('signals')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Signals
+            </button>
+            <button class="nav-btn" id="nav-portfolio" onclick="showView('portfolio')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                Portfolio
+            </button>
+            <button class="nav-btn" id="nav-refresh" onclick="refreshAll()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Refresh
+            </button>
+            <button class="nav-btn" id="nav-discover" onclick="showView('discover')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Discover
+            </button>
+            <button class="nav-btn" id="nav-advisor" onclick="showView('advisor')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                Advisor
+            </button>
+        </nav>
+
+        <!-- Change Wallet Button -->
+        <button class="change-wallet-btn" onclick="showWalletSetup()">Change Wallet</button>
+    </div>
 
     <!-- Toast -->
     <div id="toast"></div>
 
     <script>
         // ========== CONFIG ==========
-        const WALLET = '0x7329e9174EaaDeB97efd36393229C695D8524dda';
-        const WALLET_LOWER = WALLET.slice(2).toLowerCase();
+        let WALLET = '';
+        let WALLET_LOWER = '';
 
         // Public RPC endpoints (no API key needed)
         const RPC = {
@@ -413,10 +537,13 @@
             base: 'https://mainnet.base.org'
         };
 
-        // Tokens in this wallet (contract addresses)
+        // Tokens to check (contract addresses)
         const WALLET_TOKENS = [
             { symbol: 'PEPE', name: 'Pepe', chain: 'ethereum', contract: '0x6982508145454Ce325dDbE47a25d4ec3d2311933', decimals: 18, cgId: 'pepe', icon: 'https://dd.dexscreener.com/ds-data/tokens/ethereum/0x6982508145454ce325ddbe47a25d4ec3d2311933.png' },
-            { symbol: 'WOJAK', name: 'Wojak', chain: 'ethereum', contract: '0x5026F006B85729a8b14553FAE6af249aD16c9aaB', decimals: 18, cgId: 'wojak', icon: 'https://dd.dexscreener.com/ds-data/tokens/ethereum/0x5026f006b85729a8b14553fae6af249ad16c9aa0.png' }
+            { symbol: 'WOJAK', name: 'Wojak', chain: 'ethereum', contract: '0x5026F006B85729a8b14553FAE6af249aD16c9aaB', decimals: 18, cgId: 'wojak', icon: 'https://dd.dexscreener.com/ds-data/tokens/ethereum/0x5026f006b85729a8b14553fae6af249ad16c9aa0.png' },
+            { symbol: 'USDC', name: 'USD Coin', chain: 'ethereum', contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6, cgId: 'usd-coin', icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png' },
+            { symbol: 'USDT', name: 'Tether', chain: 'ethereum', contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, cgId: 'tether', icon: 'https://cryptologos.cc/logos/tether-usdt-logo.png' },
+            { symbol: 'SHIB', name: 'Shiba Inu', chain: 'ethereum', contract: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18, cgId: 'shiba-inu', icon: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png' }
         ];
 
         // Discover tokens
@@ -437,11 +564,59 @@
         let portfolio = [];
         let discoverData = [];
         let totalValue = 0;
-        let chartDataCache = {}; // Cache for chart data
+        let chartDataCache = {};
+
+        // ========== WALLET SETUP ==========
+        function connectWallet() {
+            const input = document.getElementById('wallet-input');
+            const address = input.value.trim();
+            
+            if (!address || !isValidAddress(address)) {
+                showToast('Please enter a valid Ethereum address', true);
+                input.style.borderColor = '#ff3366';
+                setTimeout(() => input.style.borderColor = '', 2000);
+                return;
+            }
+            
+            setWallet(address);
+        }
+
+        function useDemoWallet() {
+            // Demo wallet with some activity
+            setWallet('0x7329e9174EaaDeB97efd36393229C695D8524dda');
+        }
+
+        function setWallet(address) {
+            WALLET = address;
+            WALLET_LOWER = address.slice(2).toLowerCase();
+            
+            // Hide setup, show app
+            document.getElementById('wallet-setup').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Initialize app
+            document.getElementById('addr-short').textContent = address.slice(0,6) + '...' + address.slice(-4);
+            init();
+        }
+
+        function showWalletSetup() {
+            // Show setup screen again
+            document.getElementById('wallet-setup').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('wallet-input').value = WALLET;
+        }
+
+        function isValidAddress(address) {
+            return /^0x[a-fA-F0-9]{40}$/.test(address);
+        }
+
+        // Allow Enter key to connect
+        document.getElementById('wallet-input')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') connectWallet();
+        });
 
         // ========== INIT ==========
         async function init() {
-            document.getElementById('addr-short').textContent = WALLET.slice(0,6) + '...' + WALLET.slice(-4);
             await loadPortfolio();
             setInterval(loadPortfolio, 60000);
         }
@@ -524,7 +699,6 @@
             const shortAvg = shortTerm.reduce((a,b) => a+b,0) / shortTerm.length;
             const longAvg = longTerm.reduce((a,b) => a+b,0) / longTerm.length;
             
-            // Calculate highs and lows for trend structure
             const recent = prices.slice(-14);
             const highs = [];
             const lows = [];
@@ -533,7 +707,6 @@
                 if (recent[i] < recent[i-1] && recent[i] < recent[i+1]) lows.push(recent[i]);
             }
             
-            // Determine trend
             let trend = 'sideways';
             let strength = 0;
             
@@ -545,7 +718,6 @@
                 strength = Math.min(100, (1 - (shortAvg / longAvg)) * 1000);
             }
             
-            // Check higher highs/lows or lower highs/lows
             if (highs.length >= 2 && lows.length >= 2) {
                 const hh = highs[highs.length-1] > highs[highs.length-2];
                 const hl = lows[lows.length-1] > lows[lows.length-2];
@@ -571,15 +743,11 @@
             const lowQuartile = sorted[Math.floor(sorted.length * 0.25)];
             const highQuartile = sorted[Math.floor(sorted.length * 0.75)];
             
-            // Find most touched levels (simplified)
-            const current = prices[prices.length - 1];
-            const range = highQuartile - lowQuartile;
-            
             return {
                 support: lowQuartile,
                 resistance: highQuartile,
                 middle: (lowQuartile + highQuartile) / 2,
-                range: range
+                range: highQuartile - lowQuartile
             };
         }
 
@@ -591,11 +759,10 @@
             }
             const avg = returns.reduce((a,b) => a+b,0) / returns.length;
             const variance = returns.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / returns.length;
-            return Math.sqrt(variance) * 100; // Standard deviation as percentage
+            return Math.sqrt(variance) * 100;
         }
 
         async function getTechnicalAnalysis(coinId) {
-            // Check cache first
             if (chartDataCache[coinId] && Date.now() - chartDataCache[coinId].timestamp < 300000) {
                 return chartDataCache[coinId].analysis;
             }
@@ -611,11 +778,9 @@
             const levels = findSupportResistance(prices);
             const volatility = calculateVolatility(prices);
             
-            // Calculate momentum (rate of change)
             const momentum7d = ((currentPrice - prices[prices.length-8]) / prices[prices.length-8]) * 100;
             const momentum1d = ((currentPrice - prices[prices.length-2]) / prices[prices.length-2]) * 100;
             
-            // Determine signal based on technicals
             let signal = 'HOLD';
             let confidence = 50;
             
@@ -627,12 +792,11 @@
                 confidence = 60 + (trend.strength / 3);
             }
             
-            // Adjust for extreme RSI
             if (rsi > 80) {
-                signal = 'SELL'; // Overbought
+                signal = 'SELL';
                 confidence = Math.max(confidence, 75);
             } else if (rsi < 20) {
-                signal = 'BUY'; // Oversold
+                signal = 'BUY';
                 confidence = Math.max(confidence, 75);
             }
             
@@ -663,7 +827,6 @@
         // ========== LOAD PORTFOLIO ==========
         async function loadPortfolio() {
             try {
-                // Step 1: Fetch all balances in parallel
                 const balancePromises = [
                     getEthBalance('ethereum'),
                     getEthBalance('base'),
@@ -675,12 +838,10 @@
                 const ethBalBase = balances[1];
                 const tokenBalances = balances.slice(2);
 
-                // Step 2: Get prices from CoinGecko
                 const allCgIds = ['ethereum', ...WALLET_TOKENS.map(t => t.cgId)];
                 const uniqueIds = [...new Set(allCgIds)];
                 const prices = await fetchPrices(uniqueIds);
 
-                // Step 3: Build portfolio
                 portfolio = [];
                 const ethPrice = prices['ethereum']?.usd || 0;
                 const ethChange = prices['ethereum']?.usd_24h_change || 0;
@@ -724,7 +885,6 @@
                 portfolio.sort((a, b) => b.value - a.value);
                 totalValue = portfolio.reduce((s, p) => s + p.value, 0);
 
-                // Load discover data
                 await loadDiscover();
 
                 document.getElementById('loading').classList.add('hidden');
@@ -785,12 +945,11 @@
             }
         }
 
-        // ========== AI SIGNAL LOGIC (24h based) ==========
+        // ========== AI SIGNAL LOGIC ==========
         function getSignal(token) {
             const change = token.change24h || 0;
             let score = 50;
 
-            // 24h momentum (primary factor)
             if (change > 20) score += 35;
             else if (change > 10) score += 25;
             else if (change > 5) score += 15;
@@ -802,7 +961,6 @@
             else if (change > -20) score -= 30;
             else score -= 40;
 
-            // Volume/MarketCap ratio (liquidity signal)
             if (token.volume && token.marketCap && token.marketCap > 0) {
                 const vmRatio = token.volume / token.marketCap;
                 if (vmRatio > 0.3) score += 10;
@@ -1018,7 +1176,6 @@
             document.getElementById('tab-' + view).style.color = '#00ff88';
             document.getElementById('nav-' + view).classList.add('active');
             
-            // Show/hide chat input
             if (view === 'advisor') {
                 document.getElementById('chat-input-container').classList.remove('hidden');
                 document.getElementById('portfolio-summary').classList.add('hidden');
@@ -1028,7 +1185,7 @@
             }
         }
 
-        // ========== AI ADVISOR LOGIC WITH CHART ANALYSIS ==========
+        // ========== AI ADVISOR LOGIC ==========
         function askQuick(question) {
             document.getElementById('chat-input').value = question;
             sendMessage();
@@ -1043,14 +1200,10 @@
             const message = input.value.trim();
             if (!message) return;
 
-            // Add user message
             addMessage(message, 'user');
             input.value = '';
-
-            // Show typing indicator
             showTyping();
 
-            // Check if question requires chart analysis
             const requiresChart = message.toLowerCase().includes('chart') || 
                                   message.toLowerCase().includes('technical') ||
                                   message.toLowerCase().includes('trend') ||
@@ -1062,7 +1215,6 @@
                                   message.toLowerCase().includes('dip');
 
             if (requiresChart) {
-                // Extract coin ID from message
                 const coinId = extractCoinId(message);
                 if (coinId) {
                     const analysis = await getTechnicalAnalysis(coinId);
@@ -1077,7 +1229,6 @@
                     addMessage("Which coin would you like me to analyze? Try asking 'Technical analysis of PEPE' or 'Chart for ETH'.", 'ai');
                 }
             } else {
-                // Regular portfolio advice (existing logic enhanced with chart data if available)
                 setTimeout(async () => {
                     hideTyping();
                     const response = await generateEnhancedResponse(message);
@@ -1089,14 +1240,12 @@
         function extractCoinId(message) {
             const text = message.toLowerCase();
             
-            // Check portfolio first
             for (let token of portfolio) {
                 if (text.includes(token.symbol.toLowerCase()) || text.includes(token.name.toLowerCase())) {
                     return token.cgId;
                 }
             }
             
-            // Check discover tokens
             for (let token of DISCOVER_TOKENS) {
                 if (text.includes(token.symbol.toLowerCase()) || text.includes(token.name.toLowerCase())) {
                     return token.cgId;
@@ -1155,20 +1304,17 @@
         async function generateEnhancedResponse(input) {
             const text = input.toLowerCase();
             
-            // Check if asking about specific coin with chart fallback
             const coinId = extractCoinId(input);
             if (coinId && (text.includes('should i') || text.includes('buy') || text.includes('sell'))) {
                 const ta = await getTechnicalAnalysis(coinId);
                 if (ta) return formatTechnicalAnalysis(coinId, ta);
             }
             
-            // Portfolio analysis with technical context
             if (text.includes('portfolio') || text.includes('analyze')) {
                 if (portfolio.length === 0) return "Your portfolio is empty. Add some tokens first!";
                 
                 let response = "<strong>Portfolio Technical Overview</strong><br><br>";
                 
-                // Get technical analysis for top holdings
                 const topHoldings = portfolio.slice(0, 3);
                 let bullishCount = 0;
                 let bearishCount = 0;
@@ -1191,7 +1337,6 @@
                 return response;
             }
             
-            // Trend check
             if (text.includes('trend') || text.includes('bullish') || text.includes('bearish')) {
                 if (portfolio.length === 0) return "Add tokens to your portfolio to see trend analysis.";
                 
@@ -1217,7 +1362,6 @@
                 return response;
             }
             
-            // Default response
             return "I can analyze charts for you! Try asking:<br>• 'Technical analysis of PEPE'<br>• 'Is the trend bullish?'<br>• 'Support and resistance for ETH'<br>• 'Should I buy the dip?'";
         }
 
@@ -1264,32 +1408,4 @@
             return '$' + price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        function formatAmount(amount) {
-            if (amount < 0.001) return amount.toFixed(8);
-            if (amount < 1) return amount.toFixed(6);
-            return amount.toLocaleString(undefined, { maximumFractionDigits: 2 });
-        }
-
-        function formatLargeNum(num) {
-            if (!num) return '--';
-            if (num >= 1e12) return '$' + (num / 1e12).toFixed(1) + 'T';
-            if (num >= 1e9) return '$' + (num / 1e9).toFixed(1) + 'B';
-            if (num >= 1e6) return '$' + (num / 1e6).toFixed(0) + 'M';
-            if (num >= 1e3) return '$' + (num / 1e3).toFixed(0) + 'K';
-            return '$' + num.toFixed(0);
-        }
-
-        function showToast(msg, isError) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.style.opacity = '1';
-            t.style.background = isError ? 'rgba(255,51,102,0.95)' : 'rgba(0,255,136,0.95)';
-            t.style.color = isError ? '#fff' : '#000';
-            setTimeout(() => t.style.opacity = '0', 2500);
-        }
-
-        // ========== START ==========
-        init();
-    </script>
-</body>
-</html>
+        function format
